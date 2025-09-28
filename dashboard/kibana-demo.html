@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kibana Demo - Microservices Logs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f5f5f5; }
+        .kibana-header { background: #005571; color: white; padding: 15px; }
+        .log-entry { background: white; border-left: 4px solid #007c9c; margin: 5px 0; padding: 10px; border-radius: 4px; }
+        .log-info { border-left-color: #17a2b8; }
+        .log-warn { border-left-color: #ffc107; }
+        .log-error { border-left-color: #dc3545; }
+        .log-timestamp { color: #666; font-size: 0.9em; }
+        .log-service { background: #007c9c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="kibana-header">
+        <div class="container-fluid">
+            <h4>📝 Kibana Demo - Microservices Logs</h4>
+            <span class="badge bg-warning">DEMO MODE</span>
+        </div>
+    </div>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">Log Statistics</div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <strong>Total Logs:</strong> 15,247
+                        </div>
+                        <div class="mb-2">
+                            <strong>Last 1h:</strong> 1,832
+                        </div>
+                        <div class="mb-2">
+                            <strong>Errors:</strong> 12
+                        </div>
+                        <div class="mb-2">
+                            <strong>Warnings:</strong> 45
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header">Services</div>
+                    <div class="card-body">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" checked>
+                            <label class="form-check-label">user-service</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" checked>
+                            <label class="form-check-label">order-service</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" checked>
+                            <label class="form-check-label">payment-service</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header">Recent Logs</div>
+                    <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                        
+                        <div class="log-entry log-info">
+                            <div class="d-flex justify-content-between">
+                                <span class="log-service">user-service</span>
+                                <span class="log-timestamp">2025-09-24 18:20:15</span>
+                            </div>
+                            <div class="mt-2">
+                                <strong>INFO:</strong> User created successfully
+                                <br><small>user_id: user-12345, email: john@example.com, client_ip: 192.168.1.100</small>
+                            </div>
+                        </div>
+
+                        <div class="log-entry log-info">
+                            <div class="d-flex justify-content-between">
+                                <span class="log-service">order-service</span>
+                                <span class="log-timestamp">2025-09-24 18:20:14</span>
+                            </div>
+                            <div class="mt-2">
+                                <strong>INFO:</strong> Order created successfully
+                                <br><small>order_id: order-67890, user_id: user-12345, total: $999.99</small>
+                            </div>
+                        </div>
+
+                        <div class="log-entry log-warn">
+                            <div class="d-flex justify-content-between">
+                                <span class="log-service">payment-service</span>
+                                <span class="log-timestamp">2025-09-24 18:20:13</span>
+                            </div>
+                            <div class="mt-2">
+                                <strong>WARN:</strong> High amount payment detected
+                                <br><small>payment_id: payment-456, amount: $1500.00, method: credit_card</small>
+                            </div>
+                        </div>
+
+                        <div class="log-entry log-info">
+                            <div class="d-flex justify-content-between">
+                                <span class="log-service">user-service</span>
+                                <span class="log-timestamp">2025-09-24 18:20:12</span>
+                            </div>
+                            <div class="mt-2">
+                                <strong>INFO:</strong> Health check successful
+                                <br><small>response_time: 23ms, status: healthy</small>
+                            </div>
+                        </div>
+
+                        <div class="log-entry log-error">
+                            <div class="d-flex justify-content-between">
+                                <span class="log-service">order-service</span>
+                                <span class="log-timestamp">2025-09-24 18:20:10</span>
+                            </div>
+                            <div class="mt-2">
+                                <strong>ERROR:</strong> User validation failed
+                                <br><small>user_id: invalid-user, error: User not found, request_id: req-789</small>
+                            </div>
+                        </div>
+
+                        <div class="log-entry log-info">
+                            <div class="d-flex justify-content-between">
+                                <span class="log-service">payment-service</span>
+                                <span class="log-timestamp">2025-09-24 18:20:09</span>
+                            </div>
+                            <div class="mt-2">
+                                <strong>INFO:</strong> Payment processed successfully
+                                <br><small>payment_id: payment-123, status: completed, processing_time: 1.2s</small>
+                            </div>
+                        </div>
+
+                        <div class="log-entry log-info">
+                            <div class="d-flex justify-content-between">
+                                <span class="log-service">user-service</span>
+                                <span class="log-timestamp">2025-09-24 18:20:08</span>
+                            </div>
+                            <div class="mt-2">
+                                <strong>INFO:</strong> User list retrieved
+                                <br><small>count: 1247, filter: active, response_time: 45ms</small>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-4">
+            <h6>📝 Demo Mode</h6>
+            <p>Esta é uma simulação do Kibana. Para logs reais, execute:</p>
+            <code>kubectl port-forward svc/kibana 5601:5601 -n microservices</code>
+        </div>
+    </div>
+
+    <script>
+        // Auto-refresh logs every 5 seconds
+        setInterval(() => {
+            const timestamp = new Date().toLocaleString();
+            console.log('Logs refreshed at:', timestamp);
+        }, 5000);
+    </script>
+</body>
+</html>

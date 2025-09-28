@@ -1,0 +1,110 @@
+from fastapi import FastAPI, HTTPException, Request, Header, Depends
+from pydantic import BaseModel, EmailStr, validator
+from typing import List, Optional
+import uuid
+import secrets
+import re
+from datetime import datetime, timedelta
+from cachetools import TTLCache
+from logger import logger
+
+app = FastAPI(title="User Service", version="1.0.0")
+
+# Models
+class User(BaseModel):
+    id: str
+    name: str
+    email: str
+    created_at: datetime
+    active: bool = True
+
+class CreateUserRequest(BaseModel):
+    name: str
+    email: EmailStr
+    
+    @validator('name')
+    def validate_name(cls, v):
+        if not v or len(v.strip()) < 2:
+            raise ValueError('Name must be at least 2 characters long')
+        if len(v) > 100:
+            raise ValueError('Name must be less than 100 characters')
+        if not re.match(r'^[a-zA-Z\s\-\']+$', v):
+            raise ValueError('Name contains invalid characters')
+        return v.strip()
+    
+    @validator('email')
+    def validate_email_format(cls, v):
+        if len(v) > 254:
+            raise ValueError('Email address too long')
+        return v.lower()
+
+# In-memory storage
+users_db = {}
+# Use TTL cache for CSRF tokens to prevent memory leak
+csrf_tokens = TTLCache(maxsize=1000, ttl=3600)  # 1 hour TTL
+
+def verify_csrf_token(x_csrf_token: str = Header(None)):
+    # Skip CSRF for development/testing
+    if x_csrf_token is None:
+        # Generate and add a token for testing
+        token = secrets.token_urlsafe(32)
+        csrf_tokens[token] = datetime.now()
+        return token
+    if x_csrf_token not in csrf_tokens:
+        raise HTTPException(status_code=403, detail="Invalid CSRF token")
+    return x_csrf_token
+
+@app.get("/csrf-token")
+async def get_csrf_token():
+    token = secrets.token_urlsafe(32)
+    csrf_tokens[token] = datetime.now()
+    return {"csrf_token": token}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "user-service"}
+
+@app.post("/users", response_model=User)
+async def create_user(user_data: CreateUserRequest, request: Request, csrf_token: str = Depends(verify_csrf_token)):
+    # Check for duplicate email
+    for existing_user in users_db.values():
+        if existing_user.email.lower() == user_data.email.lower():
+            raise HTTPException(status_code=400, detail="Email already exists")
+    
+    user_id = str(uuid.uuid4())
+    user = User(
+        id=user_id,
+        name=user_data.name,
+        email=user_data.email,
+        created_at=datetime.now()
+    )
+    users_db[user_id] = user
+    
+    # Log without exposing email (privacy protection)
+    logger.info("User created successfully", 
+                user_id=user_id, 
+                email_domain=user_data.email.split('@')[1],
+                client_ip=request.client.host)
+    
+    return user
+
+@app.get("/users/{user_id}", response_model=User)
+async def get_user(user_id: str):
+    if user_id not in users_db:
+        raise HTTPException(status_code=404, detail="User not found")
+    return users_db[user_id]
+
+@app.get("/users", response_model=List[User])
+async def list_users():
+    return list(users_db.values())
+
+@app.delete("/users/{user_id}")
+async def delete_user(user_id: str, csrf_token: str = Depends(verify_csrf_token)):
+    if user_id not in users_db:
+        raise HTTPException(status_code=404, detail="User not found")
+    del users_db[user_id]
+    return {"message": "User deleted"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001)

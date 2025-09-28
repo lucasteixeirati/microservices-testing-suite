@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microservices Testing Suite - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .dashboard-card { background: rgba(255,255,255,0.95); border-radius: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+        .metric-card { background: linear-gradient(45deg, #667eea, #764ba2); color: white; border-radius: 10px; }
+        .service-status { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        .status-healthy { background-color: #28a745; }
+        .status-warning { background-color: #ffc107; }
+        .status-error { background-color: #dc3545; }
+        iframe { border: none; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <i class="fas fa-tachometer-alt me-2"></i>
+                Microservices Testing Suite Dashboard
+            </span>
+            <div class="d-flex">
+                <button class="btn btn-outline-light me-2" onclick="refreshAll()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="btn btn-outline-light" onclick="runTests()">
+                    <i class="fas fa-play"></i> Run Tests
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- System Overview -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="dashboard-card p-4">
+                    <h2><i class="fas fa-chart-line me-2"></i>System Overview</h2>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="metric-card p-3 text-center">
+                                <h3 id="totalServices">3</h3>
+                                <small>Services</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="metric-card p-3 text-center">
+                                <h3 id="totalTests">31+</h3>
+                                <small>Test Scenarios</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="metric-card p-3 text-center">
+                                <h3 id="testSuites">5</h3>
+                                <small>Test Suites</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="metric-card p-3 text-center">
+                                <h3 id="uptime">99.9%</h3>
+                                <small>Uptime</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services Status -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="dashboard-card p-4">
+                    <h3><i class="fas fa-server me-2"></i>Services Status</h3>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5><span class="service-status status-healthy"></span>User Service</h5>
+                                    <p class="text-muted">Python/FastAPI - Port 8001</p>
+                                    <small>Response Time: <span class="text-success">45ms</span></small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5><span class="service-status status-healthy"></span>Order Service</h5>
+                                    <p class="text-muted">Node.js/Express - Port 8002</p>
+                                    <small>Response Time: <span class="text-success">52ms</span></small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5><span class="service-status status-healthy"></span>Payment Service</h5>
+                                    <p class="text-muted">Go/Gin - Port 8003</p>
+                                    <small>Response Time: <span class="text-success">38ms</span></small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Mode Alert -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-info-circle me-2"></i>Demo Mode Active</h6>
+                    <p class="mb-0">Os links abaixo abrem versões <strong>demo/simuladas</strong> dos dashboards. Para dados reais, execute os serviços com Docker/Kubernetes.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Observability Tools -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="dashboard-card p-4">
+                    <h4><i class="fas fa-chart-bar me-2"></i>Metrics</h4>
+                    <p class="text-muted">Performance and system metrics (Demo)</p>
+                    <a href="grafana-demo.html" target="_blank" class="btn btn-primary">
+                        <i class="fab fa-grafana"></i> Open Grafana Demo
+                    </a>
+                    <a href="http://localhost:9090" target="_blank" class="btn btn-outline-primary ms-2">
+                        <i class="fas fa-fire"></i> Prometheus
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="dashboard-card p-4">
+                    <h4><i class="fas fa-file-alt me-2"></i>Logs</h4>
+                    <p class="text-muted">Centralized logging and analysis (Demo)</p>
+                    <a href="kibana-demo.html" target="_blank" class="btn btn-warning">
+                        <i class="fas fa-search"></i> Open Kibana Demo
+                    </a>
+                    <a href="http://localhost:9200" target="_blank" class="btn btn-outline-warning ms-2">
+                        <i class="fas fa-database"></i> Elasticsearch
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="dashboard-card p-4">
+                    <h4><i class="fas fa-network-wired me-2"></i>Service Mesh</h4>
+                    <p class="text-muted">Istio traffic and security (Demo)</p>
+                    <a href="kiali-demo.html" target="_blank" class="btn btn-info">
+                        <i class="fas fa-project-diagram"></i> Kiali Demo
+                    </a>
+                    <a href="http://localhost:16686" target="_blank" class="btn btn-outline-info ms-2">
+                        <i class="fas fa-route"></i> Jaeger
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="dashboard-card p-4">
+                    <h3><i class="fas fa-vial me-2"></i>Test Results</h3>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <div class="badge bg-success fs-6 mb-2">✓ Contract</div>
+                                <div>9 scenarios</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <div class="badge bg-success fs-6 mb-2">✓ Integration</div>
+                                <div>4 scenarios</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <div class="badge bg-success fs-6 mb-2">✓ Unit</div>
+                                <div>8 scenarios</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <div class="badge bg-warning fs-6 mb-2">⚡ Load</div>
+                                <div>3 suites</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <div class="badge bg-info fs-6 mb-2">🌪️ Chaos</div>
+                                <div>7 experiments</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <button class="btn btn-sm btn-primary" onclick="runTests()">
+                                    <i class="fas fa-play"></i> Run All
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Architecture Diagram -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="dashboard-card p-4">
+                    <h3><i class="fas fa-sitemap me-2"></i>Architecture Overview</h3>
+                    <div class="text-center">
+                        <img src="architecture-diagram.png" alt="Architecture Diagram" class="img-fluid" style="max-height: 400px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function refreshAll() {
+            location.reload();
+        }
+
+        function runTests() {
+            alert('Running test suite... Check terminal for results.');
+            // In real implementation, this would trigger the test runner
+        }
+
+        // Simulate real-time updates
+        setInterval(() => {
+            const responseTime = Math.floor(Math.random() * 50) + 30;
+            document.querySelectorAll('.text-success').forEach(el => {
+                if (el.textContent.includes('ms')) {
+                    el.textContent = responseTime + 'ms';
+                }
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

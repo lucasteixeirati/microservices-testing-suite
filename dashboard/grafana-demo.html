@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grafana Demo - Microservices Metrics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background: #1f1f1f; color: white; }
+        .grafana-panel { background: #2d2d2d; border-radius: 8px; padding: 20px; margin: 10px 0; }
+        .metric-value { font-size: 2rem; font-weight: bold; color: #52c41a; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <span class="navbar-brand">📊 Grafana Demo - Microservices Metrics</span>
+            <span class="badge bg-success">DEMO MODE</span>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="grafana-panel">
+                    <h5>Request Rate</h5>
+                    <div class="metric-value">1,247 req/s</div>
+                    <canvas id="requestChart" width="300" height="150"></canvas>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="grafana-panel">
+                    <h5>Response Time (P95)</h5>
+                    <div class="metric-value">45ms</div>
+                    <canvas id="latencyChart" width="300" height="150"></canvas>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="grafana-panel">
+                    <h5>Error Rate</h5>
+                    <div class="metric-value">0.02%</div>
+                    <canvas id="errorChart" width="300" height="150"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="grafana-panel">
+                    <h5>Service Health Overview</h5>
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h6>User Service</h6>
+                            <span class="badge bg-success fs-6">HEALTHY</span>
+                            <div>CPU: 12% | Memory: 256MB</div>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Order Service</h6>
+                            <span class="badge bg-success fs-6">HEALTHY</span>
+                            <div>CPU: 8% | Memory: 189MB</div>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Payment Service</h6>
+                            <span class="badge bg-success fs-6">HEALTHY</span>
+                            <div>CPU: 5% | Memory: 128MB</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-4">
+            <h6>📝 Demo Mode</h6>
+            <p>Esta é uma simulação do Grafana. Para dados reais, execute:</p>
+            <code>kubectl port-forward svc/grafana 3000:3000 -n microservices</code>
+        </div>
+    </div>
+
+    <script>
+        // Request Rate Chart
+        const ctx1 = document.getElementById('requestChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: ['10:00', '10:05', '10:10', '10:15', '10:20'],
+                datasets: [{
+                    label: 'Requests/sec',
+                    data: [1200, 1247, 1180, 1300, 1247],
+                    borderColor: '#52c41a',
+                    backgroundColor: 'rgba(82, 196, 26, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // Latency Chart
+        const ctx2 = document.getElementById('latencyChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: ['10:00', '10:05', '10:10', '10:15', '10:20'],
+                datasets: [{
+                    label: 'Latency (ms)',
+                    data: [42, 45, 38, 50, 45],
+                    borderColor: '#1890ff',
+                    backgroundColor: 'rgba(24, 144, 255, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // Error Rate Chart
+        const ctx3 = document.getElementById('errorChart').getContext('2d');
+        new Chart(ctx3, {
+            type: 'line',
+            data: {
+                labels: ['10:00', '10:05', '10:10', '10:15', '10:20'],
+                datasets: [{
+                    label: 'Error Rate (%)',
+                    data: [0.01, 0.02, 0.015, 0.025, 0.02],
+                    borderColor: '#ff4d4f',
+                    backgroundColor: 'rgba(255, 77, 79, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    </script>
+</body>
+</html>

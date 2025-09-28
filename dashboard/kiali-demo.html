@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiali Demo - Service Mesh</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #1e1e1e; color: white; }
+        .kiali-header { background: #0066cc; padding: 15px; }
+        .service-node { 
+            background: #2d2d2d; 
+            border: 2px solid #52c41a; 
+            border-radius: 50%; 
+            width: 80px; 
+            height: 80px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            margin: 20px auto;
+            position: relative;
+        }
+        .service-connection {
+            position: absolute;
+            width: 100px;
+            height: 2px;
+            background: #52c41a;
+            top: 50%;
+        }
+        .traffic-metrics { background: #2d2d2d; border-radius: 8px; padding: 15px; margin: 10px 0; }
+        .metric-good { color: #52c41a; }
+        .metric-warning { color: #faad14; }
+        .service-graph { text-align: center; padding: 40px; }
+    </style>
+</head>
+<body>
+    <div class="kiali-header">
+        <div class="container-fluid">
+            <h4>🕸️ Kiali Demo - Service Mesh Observability</h4>
+            <span class="badge bg-warning">DEMO MODE</span>
+        </div>
+    </div>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card bg-dark">
+                    <div class="card-header">Service Graph</div>
+                    <div class="card-body service-graph">
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <div class="service-node">
+                                    <div>
+                                        <div><strong>User</strong></div>
+                                        <div><small>Service</small></div>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <span class="badge bg-success">Healthy</span>
+                                    <br><small>1.2k req/s</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-1 text-center">
+                                <div style="color: #52c41a;">→</div>
+                                <small>HTTP</small>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="service-node">
+                                    <div>
+                                        <div><strong>Order</strong></div>
+                                        <div><small>Service</small></div>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <span class="badge bg-success">Healthy</span>
+                                    <br><small>850 req/s</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-1 text-center">
+                                <div style="color: #52c41a;">→</div>
+                                <small>HTTP</small>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="service-node">
+                                    <div>
+                                        <div><strong>Payment</strong></div>
+                                        <div><small>Service</small></div>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <span class="badge bg-success">Healthy</span>
+                                    <br><small>420 req/s</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h6>🔒 Security Status</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <span class="badge bg-success">mTLS Enabled</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="badge bg-success">Authorization Policies</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="badge bg-success">Network Policies</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="traffic-metrics">
+                    <h6>Traffic Metrics</h6>
+                    <div class="mb-2">
+                        <strong>Success Rate:</strong> 
+                        <span class="metric-good">99.8%</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>P50 Latency:</strong> 
+                        <span class="metric-good">23ms</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>P95 Latency:</strong> 
+                        <span class="metric-good">45ms</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>P99 Latency:</strong> 
+                        <span class="metric-warning">89ms</span>
+                    </div>
+                </div>
+
+                <div class="traffic-metrics">
+                    <h6>Circuit Breaker Status</h6>
+                    <div class="mb-2">
+                        <strong>User → Order:</strong> 
+                        <span class="metric-good">CLOSED</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Order → Payment:</strong> 
+                        <span class="metric-good">CLOSED</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Outlier Detection:</strong> 
+                        <span class="metric-good">ACTIVE</span>
+                    </div>
+                </div>
+
+                <div class="traffic-metrics">
+                    <h6>Load Balancing</h6>
+                    <div class="mb-2">
+                        <strong>User Service:</strong> 
+                        <span class="text-info">LEAST_CONN</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Order Service:</strong> 
+                        <span class="text-info">ROUND_ROBIN</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Payment Service:</strong> 
+                        <span class="text-info">LEAST_CONN</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card bg-dark">
+                    <div class="card-header">Istio Configuration Status</div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <h6>Gateway</h6>
+                                <span class="badge bg-success">ACTIVE</span>
+                                <br><small>microservices-gateway</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h6>VirtualService</h6>
+                                <span class="badge bg-success">ACTIVE</span>
+                                <br><small>microservices-vs</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h6>DestinationRules</h6>
+                                <span class="badge bg-success">3 ACTIVE</span>
+                                <br><small>All services configured</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h6>PeerAuthentication</h6>
+                                <span class="badge bg-success">STRICT mTLS</span>
+                                <br><small>Security enforced</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-4">
+            <h6>📝 Demo Mode</h6>
+            <p>Esta é uma simulação do Kiali. Para dados reais do service mesh, execute:</p>
+            <code>kubectl port-forward svc/kiali 20001:20001 -n istio-system</code>
+        </div>
+    </div>
+
+    <script>
+        // Simulate real-time updates
+        setInterval(() => {
+            const metrics = document.querySelectorAll('.metric-good, .metric-warning');
+            metrics.forEach(metric => {
+                if (metric.textContent.includes('req/s')) {
+                    const baseValue = parseInt(metric.textContent);
+                    const variation = Math.floor(Math.random() * 100) - 50;
+                    metric.textContent = (baseValue + variation) + ' req/s';
+                }
+            });
+        }, 3000);
+    </script>
+</body>
+</html>

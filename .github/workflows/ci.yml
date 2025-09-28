@@ -1,0 +1,118 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Setup Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+    
+    - name: Install Python Dependencies
+      run: |
+        cd testing-suite
+        pip install -r requirements.txt
+        
+        # Install User Service dependencies
+        cd ../services/user-service
+        pip install fastapi uvicorn pydantic cachetools email-validator
+        cd ../../testing-suite
+    
+    - name: Install Node Dependencies
+      run: |
+        cd services/order-service
+        npm install cookie-parser
+        cd ../..
+    
+    - name: Install Go Dependencies
+      run: |
+        cd services/payment-service
+        go mod tidy
+    
+    - name: Start Services
+      run: |
+        # Start User Service
+        cd services/user-service
+        nohup python main.py > ../../user-service.log 2>&1 &
+        
+        # Start Order Service
+        cd ../order-service
+        nohup node app.js > ../../order-service.log 2>&1 &
+        
+        # Start Payment Service
+        cd ../payment-service
+        nohup go run main.go > ../../payment-service.log 2>&1 &
+        
+        # Wait for services to start
+        sleep 30
+        cd ../..
+    
+    - name: Verify Services Health
+      run: |
+        curl -f http://localhost:8001/health || exit 1
+        curl -f http://localhost:8002/health || exit 1
+        curl -f http://localhost:8003/health || exit 1
+    
+    - name: Run Unit Tests
+      run: |
+        cd testing-suite
+        python -m pytest unit-tests/ -v --tb=short
+    
+    - name: Run Contract Tests
+      run: |
+        cd testing-suite
+        python -m pytest contract-tests/ -v --tb=short
+    
+    - name: Run Integration Tests
+      run: |
+        cd testing-suite
+        python -m pytest integration-tests/ -v --tb=short --maxfail=3
+    
+    - name: Show Service Logs
+      if: failure()
+      run: |
+        echo "=== User Service Log ==="
+        cat user-service.log || echo "No user service log"
+        echo "=== Order Service Log ==="
+        cat order-service.log || echo "No order service log"
+        echo "=== Payment Service Log ==="
+        cat payment-service.log || echo "No payment service log"
+    
+    - name: Stop Services
+      if: always()
+      run: |
+        pkill -f "python main.py" || true
+        pkill -f "node app.js" || true
+        pkill -f "go run main.go" || true
+    
+    - name: Generate Test Report
+      run: |
+        cd testing-suite
+        python utils/report_generator.py
+    
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-reports
+        path: testing-suite/reports/

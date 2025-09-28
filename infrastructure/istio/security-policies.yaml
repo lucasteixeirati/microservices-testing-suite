@@ -1,0 +1,59 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: microservices
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: user-service-authz
+  namespace: microservices
+spec:
+  selector:
+    matchLabels:
+      app: user-service
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/microservices/sa/order-service-sa", "cluster.local/ns/microservices/sa/payment-service-sa"]
+  - to:
+    - operation:
+        methods: ["GET", "POST", "DELETE"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: order-service-authz
+  namespace: microservices
+spec:
+  selector:
+    matchLabels:
+      app: order-service
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/microservices/sa/user-service-sa", "cluster.local/ns/microservices/sa/payment-service-sa"]
+  - to:
+    - operation:
+        methods: ["GET", "POST", "PATCH"]
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: payment-service-authz
+  namespace: microservices
+spec:
+  selector:
+    matchLabels:
+      app: payment-service
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/microservices/sa/order-service-sa"]
+  - to:
+    - operation:
+        methods: ["GET", "POST"]

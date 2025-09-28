@@ -1,0 +1,89 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+    
+    - name: Setup Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: '3.12.0'
+    
+    - name: Build Docker Images
+      run: |
+        # Build User Service
+        docker build -t microservices/user-service:${{ github.sha }} services/user-service/
+        
+        # Build Order Service  
+        docker build -t microservices/order-service:${{ github.sha }} services/order-service/
+        
+        # Build Payment Service
+        docker build -t microservices/payment-service:${{ github.sha }} services/payment-service/
+    
+    - name: Generate TLS Certificates
+      run: |
+        cd infrastructure/scripts
+        chmod +x generate-tls-certs.sh
+        ./generate-tls-certs.sh
+    
+    - name: Deploy to Kubernetes
+      run: |
+        # Apply namespace
+        kubectl apply -f infrastructure/kubernetes/namespace.yaml
+        
+        # Apply secrets with strong credentials
+        kubectl apply -f infrastructure/logging/elasticsearch-secret.yaml
+        kubectl apply -f infrastructure/monitoring/grafana-secret.yaml
+        kubectl apply -f infrastructure/istio/tls-secret.yaml
+        
+        # Apply service accounts
+        kubectl apply -f infrastructure/istio/service-accounts.yaml
+        
+        # Deploy services
+        kubectl apply -f infrastructure/kubernetes/
+        
+        # Apply Istio configuration
+        kubectl apply -f infrastructure/istio/
+        
+        # Wait for rollout
+        kubectl rollout status deployment/user-service -n microservices
+        kubectl rollout status deployment/order-service -n microservices  
+        kubectl rollout status deployment/payment-service -n microservices
+    
+    - name: Verify Deployment
+      run: |
+        # Check pod status
+        kubectl get pods -n microservices
+        
+        # Check service health
+        kubectl exec -n microservices deployment/user-service -- curl -f http://localhost:8001/health
+        kubectl exec -n microservices deployment/order-service -- curl -f http://localhost:8002/health
+        kubectl exec -n microservices deployment/payment-service -- curl -f http://localhost:8003/health
+    
+    - name: Run Smoke Tests
+      run: |
+        # Port forward for testing
+        kubectl port-forward -n microservices svc/user-service 8001:8001 &
+        kubectl port-forward -n microservices svc/order-service 8002:8002 &
+        kubectl port-forward -n microservices svc/payment-service 8003:8003 &
+        
+        sleep 10
+        
+        # Run basic smoke tests
+        cd testing-suite
+        python -m pytest integration-tests/test_end_to_end_flow.py::TestEndToEndFlow::test_complete_user_order_payment_flow -v
