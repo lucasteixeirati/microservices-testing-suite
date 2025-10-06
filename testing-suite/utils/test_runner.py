@@ -6,6 +6,7 @@ Orchestrates different types of tests with proper setup and teardown
 
 import subprocess
 import sys
+import os
 import time
 import requests
 import argparse
@@ -59,8 +60,7 @@ class TestRunner:
         
         cmd = [
             'pytest', 
-            'contract-tests/',
-            '-m', 'contract',
+            '../contract-tests/' if 'utils' in os.getcwd() else 'contract-tests/',
             '--tb=short',
             '-v'
         ]
@@ -92,8 +92,7 @@ class TestRunner:
         
         cmd = [
             'pytest',
-            'integration-tests/',
-            '-m', 'integration',
+            '../integration-tests/' if 'utils' in os.getcwd() else 'integration-tests/',
             '--tb=short',
             '-v'
         ]
@@ -124,14 +123,17 @@ class TestRunner:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         report_name = f"load_test_report_{timestamp}.html"
         
+        locust_file = '../load-tests/locustfile.py' if 'utils' in os.getcwd() else 'load-tests/locustfile.py'
+        reports_dir = '../reports/' if 'utils' in os.getcwd() else 'reports/'
+        
         cmd = [
             'locust',
-            '-f', 'load-tests/locustfile.py',
+            '-f', locust_file,
             '--headless',
             '--users', str(users),
             '--spawn-rate', '2',
             '--run-time', duration,
-            '--html', f'reports/{report_name}'
+            '--html', f'{reports_dir}{report_name}'
         ]
         
         try:
@@ -161,8 +163,7 @@ class TestRunner:
         
         cmd = [
             'pytest',
-            'chaos-tests/',
-            '-m', 'chaos',
+            '../chaos-tests/' if 'utils' in os.getcwd() else 'chaos-tests/',
             '--tb=short',
             '-v',
             '-s'  # Don't capture output for chaos tests
@@ -185,8 +186,7 @@ class TestRunner:
         
         cmd = [
             'pytest',
-            'security-tests/',
-            '-m', 'security',
+            '../security-tests/' if 'utils' in os.getcwd() else 'security-tests/',
             '--tb=short',
             '-v'
         ]
@@ -212,8 +212,7 @@ class TestRunner:
         
         cmd = [
             'pytest',
-            'api-tests/',
-            '-m', 'api',
+            '../api-tests/' if 'utils' in os.getcwd() else 'api-tests/',
             '--tb=short',
             '-v'
         ]
@@ -239,8 +238,9 @@ class TestRunner:
         
         try:
             # Run performance test runner with report generation
+            perf_script = "run_performance_tests.py" if 'utils' in os.getcwd() else "utils/run_performance_tests.py"
             result = subprocess.run([
-                sys.executable, "utils/run_performance_tests.py"
+                sys.executable, perf_script
             ], capture_output=True, text=True, timeout=600)
             
             if result.returncode == 0:

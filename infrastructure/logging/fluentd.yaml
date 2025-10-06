@@ -112,6 +112,22 @@ spec:
           value: "elasticsearch"
         - name: FLUENT_ELASTICSEARCH_PORT
           value: "9200"
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - "ps aux | grep fluentd"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - "ps aux | grep fluentd"
+          initialDelaySeconds: 10
+          periodSeconds: 5
         resources:
           requests:
             memory: "200Mi"

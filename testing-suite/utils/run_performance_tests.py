@@ -45,7 +45,7 @@ def run_performance_tests():
     cmd = [
         sys.executable, '-m', 'pytest', 
         'performance-tests/test_performance_comprehensive.py',
-        '-v', '--tb=short', '--json-report', '--json-report-file=temp_performance_results.json'
+        '-v', '--tb=short'
     ]
     
     try:
@@ -85,47 +85,56 @@ def parse_pytest_output(stdout):
     
     return performance_data
 
-def generate_mock_metrics(test_name):
-    """Generate mock metrics based on test name"""
+def extract_real_metrics_from_json(json_file):
+    """Extract real performance metrics from pytest JSON output"""
+    try:
+        if os.path.exists(json_file):
+            with open(json_file, 'r') as f:
+                data = json.load(f)
+                
+            metrics = {}
+            for test in data.get('tests', []):
+                test_name = test.get('nodeid', '').split('::')[-1].replace('test_', '')
+                duration = test.get('duration', 0)
+                outcome = test.get('outcome', 'failed')
+                
+                metrics[test_name] = {
+                    'duration_seconds': duration,
+                    'status': outcome,
+                    'success_rate': 1.0 if outcome == 'passed' else 0.0
+                }
+            
+            return metrics
+    except Exception as e:
+        print(f"Warning: Could not extract real metrics: {e}")
+    
+    return {}
+
+def generate_demo_metrics(test_name):
+    """Generate demo metrics for portfolio demonstration"""
+    # NOTE: This generates demo data for portfolio purposes
+    # In production, replace with actual performance measurement
     import random
     
-    base_metrics = {
+    demo_metrics = {
         'user_service_response_time': {
-            'iterations': 50,
-            'avg_response_time': random.uniform(45, 85),
-            'p95_response_time': random.uniform(90, 150),
-            'min_response_time': random.uniform(20, 40),
-            'max_response_time': random.uniform(100, 200)
+            'note': 'Demo data for portfolio',
+            'avg_response_time_ms': round(random.uniform(45, 85), 2),
+            'p95_response_time_ms': round(random.uniform(90, 150), 2),
+            'success_rate': round(random.uniform(0.95, 1.0), 3)
         },
         'concurrent_user_creation': {
+            'note': 'Demo data for portfolio', 
             'concurrent_users': 10,
-            'total_requests': 50,
-            'success_rate': random.uniform(0.95, 1.0),
-            'avg_response_time': random.uniform(150, 300)
-        },
-        'order_service_throughput': {
-            'duration': 10,
-            'total_requests': random.randint(45, 65),
-            'throughput_rps': random.uniform(4.5, 6.5),
-            'avg_response_time': random.uniform(180, 280)
-        },
-        'payment_processing_latency': {
-            'iterations': 20,
-            'avg_creation_time': random.uniform(60, 90),
-            'avg_processing_time': random.uniform(80, 120)
-        },
-        'memory_usage_simulation': {
-            'initial_memory_mb': random.uniform(50, 80),
-            'peak_memory_mb': random.uniform(80, 120),
-            'memory_increase_mb': random.uniform(20, 40),
-            'memory_cleanup_mb': random.uniform(15, 35)
+            'success_rate': round(random.uniform(0.95, 1.0), 3),
+            'avg_response_time_ms': round(random.uniform(150, 300), 2)
         }
     }
     
-    return base_metrics.get(test_name, {
-        'avg_response_time': random.uniform(50, 200),
-        'success_rate': random.uniform(0.9, 1.0),
-        'total_requests': random.randint(10, 100)
+    return demo_metrics.get(test_name, {
+        'note': 'Demo data for portfolio',
+        'avg_response_time_ms': round(random.uniform(50, 200), 2),
+        'success_rate': round(random.uniform(0.9, 1.0), 3)
     })
 
 def main():
@@ -143,14 +152,23 @@ def main():
     success, stdout, stderr = run_performance_tests()
     
     if not success:
-        print(f"\n❌ Performance tests failed!")
+        print(f"\n[FAILED] Performance tests failed!")
         print(f"Error: {stderr}")
         return 1
     
     print("\n[SUCCESS] Performance tests completed successfully!")
     
+    # Extract real metrics from JSON if available, otherwise use demo data
+    real_metrics = extract_real_metrics_from_json('temp_performance_results.json')
+    
     # Parse results and generate report
     performance_data = parse_pytest_output(stdout)
+    
+    # Enhance with real metrics if available
+    for test_data in performance_data:
+        test_name = test_data['test_name']
+        if test_name in real_metrics:
+            test_data['metrics'].update(real_metrics[test_name])
     
     # Generate performance report
     report_generator = PerformanceReportGenerator()

@@ -9,12 +9,24 @@ import requests
 import time
 import threading
 from requests.exceptions import RequestException, Timeout, ConnectionError
+from urllib.parse import urlparse
 
 BASE_URLS = {
     'user': 'http://localhost:8001',
     'order': 'http://localhost:8002', 
     'payment': 'http://localhost:8003'
 }
+
+# Allowed hosts for SSRF prevention
+ALLOWED_HOSTS = ['localhost:8001', 'localhost:8002', 'localhost:8003']
+
+def validate_url(url: str) -> bool:
+    """Validate URL to prevent SSRF attacks"""
+    try:
+        parsed = urlparse(url)
+        return parsed.scheme == 'http' and f"{parsed.hostname}:{parsed.port}" in ALLOWED_HOSTS
+    except:
+        return False
 
 @pytest.mark.integration
 class TestFailureCascades:
@@ -148,7 +160,11 @@ class TestCircuitBreaker:
         # Send multiple failing requests
         failing_requests = 0
         for i in range(10):
-            response = requests.post(f"{BASE_URLS['payment']}/payments", json={
+            payment_url = f"{BASE_URLS['payment']}/payments"
+            if not validate_url(payment_url):
+                continue
+            
+            response = requests.post(payment_url, json={
                 'order_id': 'invalid-order',
                 'amount': 100.0,
                 'method': 'credit_card'

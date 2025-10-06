@@ -63,7 +63,8 @@ class StructuredFormatter(logging.Formatter):
             message = str(message)
         
         # Remove control characters and newlines that could break log format
-        sanitized = re.sub(r'[\r\n\t]', ' ', message)
+        # This prevents log injection attacks
+        sanitized = re.sub(r'[\r\n\t\x00-\x1f\x7f-\x9f]', ' ', message)
         
         # Remove potential ANSI escape sequences
         sanitized = re.sub(r'\x1b\[[0-9;]*m', '', sanitized)

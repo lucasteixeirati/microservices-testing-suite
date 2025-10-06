@@ -9,6 +9,9 @@ class TestValidationUtils:
         """Test comprehensive email validation"""
         def is_valid_email(email):
             pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            # Check for consecutive dots
+            if '..' in email:
+                return False
             return re.match(pattern, email) is not None and len(email) <= 254
         
         valid_emails = [

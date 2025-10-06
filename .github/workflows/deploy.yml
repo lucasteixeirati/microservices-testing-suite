@@ -24,6 +24,29 @@ jobs:
       with:
         version: '3.12.0'
     
+    # SECURITY: Add authentication for your cloud provider
+    # Uncomment and configure based on your deployment target:
+    
+    # For AWS EKS:
+    # - name: Configure AWS credentials
+    #   uses: aws-actions/configure-aws-credentials@v4
+    #   with:
+    #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #     aws-region: us-west-2
+    
+    # For Google GKE:
+    # - name: Authenticate to Google Cloud
+    #   uses: google-github-actions/auth@v2
+    #   with:
+    #     credentials_json: ${{ secrets.GCP_SA_KEY }}
+    
+    # For Azure AKS:
+    # - name: Azure Login
+    #   uses: azure/login@v1
+    #   with:
+    #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
     - name: Build Docker Images
       run: |
         # Build User Service
@@ -43,6 +66,12 @@ jobs:
     
     - name: Deploy to Kubernetes
       run: |
+        # SECURITY: Ensure kubectl is authenticated before deployment
+        # This will fail without proper cloud authentication configured above
+        
+        # Verify cluster access
+        kubectl cluster-info
+        
         # Apply namespace
         kubectl apply -f infrastructure/kubernetes/namespace.yaml
         

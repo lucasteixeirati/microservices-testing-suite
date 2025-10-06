@@ -1,7 +1,9 @@
 import json
 import os
+import html
 from datetime import datetime
 import statistics
+from pathlib import Path
 
 class PerformanceReportGenerator:
     
@@ -60,13 +62,14 @@ class PerformanceReportGenerator:
         """Generate HTML performance report"""
         self.calculate_summary()
         
-        # Create reports directory if it doesn't exist
-        os.makedirs(output_dir, exist_ok=True)
+        # Secure path handling
+        safe_output_dir = Path(output_dir).resolve()
+        safe_output_dir.mkdir(parents=True, exist_ok=True)
         
         # Generate filename with timestamp
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = f'performance_report_{timestamp}.html'
-        filepath = os.path.join(output_dir, filename)
+        filepath = safe_output_dir / filename
         
         html_content = self._generate_html_content()
         
@@ -220,7 +223,7 @@ class PerformanceReportGenerator:
             
             html += f"""
             <div class="test-result">
-                <div class="test-name">{test_name}</div>
+                <div class="test-name">{html.escape(str(test_name))}</div>
                 <div class="test-metrics">
             """
             
@@ -236,8 +239,8 @@ class PerformanceReportGenerator:
                 
                 html += f"""
                     <div class="metric">
-                        <div class="metric-label">{key.replace('_', ' ').title()}:</div>
-                        <div class="metric-value">{formatted_value}</div>
+                        <div class="metric-label">{html.escape(key.replace('_', ' ').title())}:</div>
+                        <div class="metric-value">{html.escape(str(formatted_value))}</div>
                     </div>
                 """
             
@@ -287,11 +290,11 @@ class PerformanceReportGenerator:
             
             html += f"""
                 <tr>
-                    <td>{test_name}</td>
+                    <td>{html.escape(str(test_name))}</td>
                     <td>{avg_time:.2f}</td>
                     <td>{success_rate:.1%}</td>
-                    <td>{total_requests}</td>
-                    <td class="{status_class}">{status}</td>
+                    <td>{html.escape(str(total_requests))}</td>
+                    <td class="{status_class}">{html.escape(status)}</td>
                 </tr>
             """
         
@@ -306,13 +309,14 @@ class PerformanceReportGenerator:
         """Generate JSON performance report"""
         self.calculate_summary()
         
-        # Create reports directory if it doesn't exist
-        os.makedirs(output_dir, exist_ok=True)
+        # Secure path handling
+        safe_output_dir = Path(output_dir).resolve()
+        safe_output_dir.mkdir(parents=True, exist_ok=True)
         
         # Generate filename with timestamp
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = f'performance_report_{timestamp}.json'
-        filepath = os.path.join(output_dir, filename)
+        filepath = safe_output_dir / filename
         
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(self.report_data, f, indent=2, ensure_ascii=False)

@@ -15,11 +15,11 @@ commonLabels:
 
 images:
 - name: user-service
-  newTag: latest
+  newTag: v1.0.0
 - name: order-service
-  newTag: latest
+  newTag: v1.0.0
 - name: payment-service
-  newTag: latest
+  newTag: v1.0.0
 
 replicas:
 - name: user-service

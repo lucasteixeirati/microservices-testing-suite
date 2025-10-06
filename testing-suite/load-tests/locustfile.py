@@ -14,8 +14,8 @@ class UserServiceLoadTest(HttpUser):
     def create_user(self):
         """Create a new user"""
         user_data = {
-            'name': f'LoadTest User {random.randint(1, 1000)}',
-            'email': f'loadtest{random.randint(1, 1000)}@example.com'
+            'name': f'LoadTest User {random.randint(1, 10000)}',
+            'email': f'loadtest{uuid.uuid4().hex[:8]}@example.com'
         }
         
         with self.client.post('/users', json=user_data, catch_response=True) as response:
@@ -78,11 +78,37 @@ class OrderServiceLoadTest(HttpUser):
             'total_amount': round(random.uniform(10, 500), 2)
         }
         
-        with self.client.post('/orders', json=order_data, catch_response=True) as response:
+        # Get CSRF token for order service
+        headers = {}
+        csrf_response = self.client.get('/csrf-token', catch_response=True)
+        if csrf_response.status_code == 200:
+            csrf_token = csrf_response.json().get('csrfToken')
+            if csrf_token:
+                headers['X-CSRF-Token'] = csrf_token
+        
+        with self.client.post('/orders', json=order_data, headers=headers, catch_response=True) as response:
             if response.status_code == 201:
                 order = response.json()
                 self.created_orders.append(order['id'])
                 response.success()
+            elif response.status_code == 403:
+                # CSRF issue - get fresh token and retry once
+                csrf_response = self.client.get('/csrf-token', catch_response=True)
+                if csrf_response.status_code == 200:
+                    csrf_token = csrf_response.json().get('csrfToken')
+                    if csrf_token:
+                        headers['X-CSRF-Token'] = csrf_token
+                        retry_response = self.client.post('/orders', json=order_data, headers=headers, catch_response=True)
+                        if retry_response.status_code == 201:
+                            order = retry_response.json()
+                            self.created_orders.append(order['id'])
+                            response.success()
+                        else:
+                            response.failure(f"Failed to create order: {retry_response.status_code}")
+                    else:
+                        response.failure(f"Failed to create order: {response.status_code}")
+                else:
+                    response.failure(f"Failed to create order: {response.status_code}")
             else:
                 response.failure(f"Failed to create order: {response.status_code}")
     
@@ -104,9 +130,18 @@ class OrderServiceLoadTest(HttpUser):
             order_id = random.choice(self.created_orders)
             status = random.choice(['pending', 'completed', 'cancelled'])
             
+            # Get CSRF token for PATCH
+            headers = {}
+            csrf_response = self.client.get('/csrf-token', catch_response=True)
+            if csrf_response.status_code == 200:
+                csrf_token = csrf_response.json().get('csrfToken')
+                if csrf_token:
+                    headers['X-CSRF-Token'] = csrf_token
+            
             with self.client.patch(
                 f'/orders/{order_id}/status',
                 json={'status': status},
+                headers=headers,
                 catch_response=True
             ) as response:
                 if response.status_code == 200:

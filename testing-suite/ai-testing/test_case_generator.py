@@ -45,7 +45,12 @@ class AITestCaseGenerator:
     def analyze_code_file(self, file_path: str) -> Dict[str, Any]:
         """Analisa arquivo de código e extrai informações"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            # Secure path handling to prevent path traversal
+            safe_path = Path(file_path).resolve()
+            if not safe_path.exists():
+                return {'error': f'File not found: {file_path}', 'file_path': file_path}
+            
+            with open(safe_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             
             analysis = {

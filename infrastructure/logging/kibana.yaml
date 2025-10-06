@@ -18,6 +18,18 @@ spec:
         image: docker.elastic.co/kibana/kibana:8.11.0
         ports:
         - containerPort: 5601
+        livenessProbe:
+          httpGet:
+            path: /api/status
+            port: 5601
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/status
+            port: 5601
+          initialDelaySeconds: 30
+          periodSeconds: 5
         env:
         - name: ELASTICSEARCH_HOSTS
           value: "http://elasticsearch:9200"
@@ -28,8 +40,6 @@ spec:
             secretKeyRef:
               name: elasticsearch-secret
               key: password
-        - name: XPACK_SECURITY_ENABLED
-          value: "true"
         - name: XPACK_SECURITY_ENABLED
           value: "false"
         resources:

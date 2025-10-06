@@ -384,9 +384,9 @@ def api_insights():
 
 def main():
     """Executar dashboard de IA"""
-    print("🤖 Starting AI Testing Dashboard...")
-    print("📊 Dashboard available at: http://localhost:5000")
-    print("🧠 AI components loaded and ready")
+    print("Starting AI Testing Dashboard...")
+    print("Dashboard available at: http://localhost:5000")
+    print("AI components loaded and ready")
     
     app.run(debug=False, host='127.0.0.1', port=5000)
 

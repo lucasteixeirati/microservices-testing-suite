@@ -54,17 +54,45 @@ jobs:
         # Start User Service
         cd services/user-service
         nohup python main.py > ../../user-service.log 2>&1 &
+        USER_PID=$!
+        echo "Started User Service with PID: $USER_PID"
         
         # Start Order Service
         cd ../order-service
         nohup node app.js > ../../order-service.log 2>&1 &
+        ORDER_PID=$!
+        echo "Started Order Service with PID: $ORDER_PID"
         
         # Start Payment Service
         cd ../payment-service
         nohup go run main.go > ../../payment-service.log 2>&1 &
+        PAYMENT_PID=$!
+        echo "Started Payment Service with PID: $PAYMENT_PID"
         
-        # Wait for services to start
-        sleep 30
+        # Wait for services to start and verify they're running
+        sleep 10
+        
+        # Check if processes are still running
+        if ! kill -0 $USER_PID 2>/dev/null; then
+          echo "User service failed to start"
+          cat ../../user-service.log
+          exit 1
+        fi
+        
+        if ! kill -0 $ORDER_PID 2>/dev/null; then
+          echo "Order service failed to start"
+          cat ../../order-service.log
+          exit 1
+        fi
+        
+        if ! kill -0 $PAYMENT_PID 2>/dev/null; then
+          echo "Payment service failed to start"
+          cat ../../payment-service.log
+          exit 1
+        fi
+        
+        # Additional wait for services to be ready
+        sleep 20
         cd ../..
     
     - name: Verify Services Health
