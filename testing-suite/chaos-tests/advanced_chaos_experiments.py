@@ -45,6 +45,7 @@ class AdvancedChaosTestSuite:
 
 class TestAdvancedChaosExperiments(AdvancedChaosTestSuite):
     
+    @pytest.mark.chaos
     def test_rolling_restart_chaos(self):
         """Test rolling restart of all services"""
         services_to_restart = ['user-service', 'order-service', 'payment-service']
@@ -93,6 +94,7 @@ class TestAdvancedChaosExperiments(AdvancedChaosTestSuite):
         recovered_services = [s for s, r in restart_results.items() if r.get('final_health', False)]
         assert len(recovered_services) >= 1, "No services recovered from rolling restart"
     
+    @pytest.mark.chaos
     def test_memory_pressure_simulation(self):
         """Test system behavior under memory pressure"""
         # Simulate memory pressure by creating many requests
@@ -154,6 +156,7 @@ class TestAdvancedChaosExperiments(AdvancedChaosTestSuite):
             # Under memory pressure, at least 50% should still succeed
             assert success_rate >= 0.5, f"Success rate too low under memory pressure: {success_rate:.2%}"
     
+    @pytest.mark.chaos
     def test_network_latency_simulation(self):
         """Test system behavior with network latency"""
         # Simulate network latency by making requests with delays
@@ -189,6 +192,7 @@ class TestAdvancedChaosExperiments(AdvancedChaosTestSuite):
         successful_requests = [r for r in latency_results if r.get('success', False)]
         assert len(successful_requests) >= 2, "Service should handle network latency"
     
+    @pytest.mark.chaos
     def test_cpu_intensive_load(self):
         """Test system behavior under CPU-intensive load"""
         def cpu_intensive_task():
@@ -232,6 +236,7 @@ class TestAdvancedChaosExperiments(AdvancedChaosTestSuite):
             success_rate = len(successful_requests) / len(results)
             assert success_rate >= 0.7, f"Service degraded too much under CPU load: {success_rate:.2%}"
     
+    @pytest.mark.chaos
     def test_disk_io_stress(self):
         """Test system behavior under disk I/O stress"""
         # Simulate disk I/O stress by creating many users (database writes)
@@ -285,6 +290,7 @@ class TestAdvancedChaosExperiments(AdvancedChaosTestSuite):
             assert success_rate >= 0.6, f"I/O stress caused too many failures: {success_rate:.2%}"
             assert avg_response_time < 2000, f"I/O stress caused excessive response times: {avg_response_time:.2f}ms"
     
+    @pytest.mark.chaos
     def test_gradual_load_increase(self):
         """Test system behavior with gradually increasing load"""
         load_levels = [1, 3, 5, 8, 10]  # Gradual increase
@@ -344,6 +350,7 @@ class TestAdvancedChaosExperiments(AdvancedChaosTestSuite):
             # Success rate shouldn't drop below 50% even under high load
             assert last_success_rate >= 0.5, f"System failed under load: {last_success_rate:.2%}"
     
+    @pytest.mark.chaos
     def test_service_dependency_failure_cascade(self):
         """Test cascade failure when dependencies fail"""
         # Test order service behavior when user service fails

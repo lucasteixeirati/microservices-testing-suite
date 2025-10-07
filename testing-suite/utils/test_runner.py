@@ -233,25 +233,26 @@ class TestRunner:
             return False
     
     def run_performance_tests(self) -> bool:
-        """Run performance tests with report generation"""
+        """Run performance tests"""
         print("\n[PERFORMANCE] Running Performance Tests...")
         
+        cmd = [
+            'pytest',
+            '../performance-tests/' if 'utils' in os.getcwd() else 'performance-tests/',
+            '--tb=short',
+            '-v'
+        ]
+        
         try:
-            # Run performance test runner with report generation
-            perf_script = "run_performance_tests.py" if 'utils' in os.getcwd() else "utils/run_performance_tests.py"
-            result = subprocess.run([
-                sys.executable, perf_script
-            ], capture_output=True, text=True, timeout=600)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
             
             if result.returncode == 0:
                 print("[SUCCESS] Performance tests passed!")
-                print(result.stdout)
                 return True
             else:
                 print("[FAILED] Performance tests failed!")
                 print(result.stdout)
-                if result.stderr:
-                    print(f"Error: {result.stderr}")
+                print(result.stderr)
                 return False
         except subprocess.TimeoutExpired:
             print("[TIMEOUT] Performance tests timed out")

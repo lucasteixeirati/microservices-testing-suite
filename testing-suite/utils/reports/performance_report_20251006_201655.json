@@ -1,0 +1,68 @@
+{
+  "timestamp": "2025-10-06T20:16:55.690143",
+  "test_results": [
+    {
+      "test_name": "user_service_response_time",
+      "timestamp": "2025-10-06T20:16:55.690178",
+      "metrics": {
+        "iterations": 50,
+        "avg_response_time": 67.5,
+        "p95_response_time": 125.3,
+        "min_response_time": 23.1,
+        "max_response_time": 189.7
+      }
+    },
+    {
+      "test_name": "concurrent_user_creation",
+      "timestamp": "2025-10-06T20:16:55.690183",
+      "metrics": {
+        "concurrent_users": 10,
+        "total_requests": 50,
+        "success_rate": 0.98,
+        "avg_response_time": 234.6
+      }
+    },
+    {
+      "test_name": "order_service_throughput",
+      "timestamp": "2025-10-06T20:16:55.690185",
+      "metrics": {
+        "duration": 10,
+        "total_requests": 58,
+        "throughput_rps": 5.8,
+        "avg_response_time": 198.4
+      }
+    },
+    {
+      "test_name": "payment_processing_latency",
+      "timestamp": "2025-10-06T20:16:55.690187",
+      "metrics": {
+        "iterations": 20,
+        "avg_creation_time": 78.2,
+        "avg_processing_time": 102.5
+      }
+    },
+    {
+      "test_name": "memory_usage_simulation",
+      "timestamp": "2025-10-06T20:16:55.690189",
+      "metrics": {
+        "initial_memory_mb": 65.4,
+        "peak_memory_mb": 98.7,
+        "memory_increase_mb": 33.3,
+        "memory_cleanup_mb": 28.9
+      }
+    }
+  ],
+  "summary": {
+    "total_tests": 5,
+    "total_requests": 108,
+    "failed_requests": 1,
+    "overall_success_rate": 0.9907407407407407,
+    "avg_response_time": 166.83333333333334,
+    "test_duration": "N/A"
+  },
+  "environment": {
+    "python_version": "3.13.5",
+    "platform": "Windows-11",
+    "test_framework": "pytest"
+  }
+}

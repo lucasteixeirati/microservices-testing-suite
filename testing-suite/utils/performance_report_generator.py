@@ -83,7 +83,7 @@ class PerformanceReportGenerator:
         """Generate HTML content for the report"""
         summary = self.report_data['summary']
         
-        html = f"""
+        html_content = f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -212,16 +212,16 @@ class PerformanceReportGenerator:
 </body>
 </html>
         """
-        return html
+        return html_content
     
     def _generate_test_results_html(self):
         """Generate HTML for individual test results"""
-        html = ""
+        html_output = ""
         for result in self.report_data['test_results']:
             test_name = result['test_name']
             metrics = result['metrics']
             
-            html += f"""
+            html_output += f"""
             <div class="test-result">
                 <div class="test-name">{html.escape(str(test_name))}</div>
                 <div class="test-metrics">
@@ -237,26 +237,26 @@ class PerformanceReportGenerator:
                 else:
                     formatted_value = str(value)
                 
-                html += f"""
+                html_output += f"""
                     <div class="metric">
                         <div class="metric-label">{html.escape(key.replace('_', ' ').title())}:</div>
                         <div class="metric-value">{html.escape(str(formatted_value))}</div>
                     </div>
                 """
             
-            html += """
+            html_output += """
                 </div>
             </div>
             """
         
-        return html
+        return html_output
     
     def _generate_metrics_table(self):
         """Generate metrics comparison table"""
         if not self.report_data['test_results']:
             return "<p>No test results available</p>"
         
-        html = """
+        html_table = """
         <table>
             <thead>
                 <tr>
@@ -288,7 +288,7 @@ class PerformanceReportGenerator:
                 status = "FAIL"
                 status_class = "danger"
             
-            html += f"""
+            html_table += f"""
                 <tr>
                     <td>{html.escape(str(test_name))}</td>
                     <td>{avg_time:.2f}</td>
@@ -298,12 +298,12 @@ class PerformanceReportGenerator:
                 </tr>
             """
         
-        html += """
+        html_table += """
             </tbody>
         </table>
         """
         
-        return html
+        return html_table
     
     def generate_json_report(self, output_dir='reports'):
         """Generate JSON performance report"""

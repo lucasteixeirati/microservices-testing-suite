@@ -61,6 +61,7 @@ class TestChaosExperiments:
     def setup_method(self):
         self.chaos_suite = ChaosTestSuite()
     
+    @pytest.mark.chaos
     def test_service_restart_resilience(self):
         """Test system resilience when a service is restarted"""
         target_service = 'order-service'
@@ -72,9 +73,8 @@ class TestChaosExperiments:
         # Verify service is initially healthy
         assert self.chaos_suite.is_service_healthy(target_service)
         
-        # Skip Docker operations for demo
-        print(f"Would restart {target_service} (Docker operations skipped for demo)")
-        # container.restart()
+        # Restart container
+        container.restart()
         
         # Wait for recovery
         recovered = self.chaos_suite.wait_for_service_recovery(target_service)
@@ -84,6 +84,7 @@ class TestChaosExperiments:
         assert self.chaos_suite.is_service_healthy('user-service')
         assert self.chaos_suite.is_service_healthy('payment-service')
     
+    @pytest.mark.chaos
     def test_service_kill_and_recovery(self):
         """Test system behavior when a service is killed"""
         target_service = 'payment-service'
@@ -92,15 +93,15 @@ class TestChaosExperiments:
         if not container:
             pytest.skip(f"Container for {target_service} not found")
         
-        # Skip Docker operations for demo
-        print(f"Would kill and restart {target_service} (Docker operations skipped for demo)")
-        # container.kill()
-        # container.start()
+        # Kill and restart container
+        container.kill()
+        container.start()
         
         # Wait for recovery
         recovered = self.chaos_suite.wait_for_service_recovery(target_service)
         assert recovered, f"{target_service} did not recover after restart"
     
+    @pytest.mark.chaos
     def test_cascade_failure_simulation(self):
         """Test how system handles cascade failures"""
         # Create a user first
@@ -114,9 +115,10 @@ class TestChaosExperiments:
         
         user_id = user_response.json()['id']
         
-        # Skip Docker operations for demo
-        print("Would kill user service (Docker operations skipped for demo)")
-        # user_container.kill()
+        # Kill user service to simulate cascade failure
+        user_container = self.chaos_suite.get_container('user-service')
+        if user_container:
+            user_container.kill()
         
         # Try to create order (should fail gracefully)
         order_response = requests.post(
@@ -131,10 +133,11 @@ class TestChaosExperiments:
         # Should fail with proper error handling
         assert order_response.status_code in [400, 500, 503]
         
-        # Skip Docker operations for demo
-        print("Would restart user service (Docker operations skipped for demo)")
-        # user_container.start()
+        # Restart user service
+        if user_container:
+            user_container.start()
     
+    @pytest.mark.chaos
     def test_random_service_disruption(self):
         """Randomly disrupt services and test recovery"""
         disruption_count = 3
@@ -170,11 +173,9 @@ class TestChaosExperiments:
             # Brief pause between disruptions
             time.sleep(2)
     
+    @pytest.mark.chaos
     def test_network_partition_simulation(self):
         """Simulate network partitions between services"""
-        # This would require more advanced network manipulation
-        # For now, we'll simulate by stopping/starting services
-        
         # Stop order service to simulate network partition
         order_container = self.chaos_suite.get_container('order-service')
         if order_container:
@@ -204,12 +205,9 @@ class TestChaosExperiments:
             order_container.start()
             self.chaos_suite.wait_for_service_recovery('order-service')
     
+    @pytest.mark.chaos
     def test_resource_exhaustion(self):
         """Test behavior under resource constraints"""
-        # This is a simplified version - in real scenarios you'd use tools like
-        # stress-ng or cgroup limits
-        
-        # Create many concurrent requests to simulate load
         import threading
         import queue
         
