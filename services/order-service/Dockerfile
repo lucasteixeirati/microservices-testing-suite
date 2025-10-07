@@ -2,6 +2,9 @@ FROM node:18-slim
 
 WORKDIR /app
 
+# Install system dependencies
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies
 COPY package*.json ./
 RUN npm ci --only=production

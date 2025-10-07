@@ -1,0 +1,81 @@
+# Production Configuration for Microservices Testing Suite
+# This file contains production-ready configurations
+
+# Security Configuration
+security:
+  # HTTPS/TLS Configuration
+  tls:
+    enabled: true
+    cert_path: "/etc/ssl/certs/microservices.crt"
+    key_path: "/etc/ssl/private/microservices.key"
+    min_version: "1.2"
+    
+  # CSRF Protection
+  csrf:
+    enabled: true
+    token_length: 32
+    cookie_secure: true
+    cookie_httponly: true
+    
+  # CORS Configuration
+  cors:
+    allowed_origins: 
+      - "https://yourdomain.com"
+      - "https://api.yourdomain.com"
+    allowed_methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
+    allowed_headers: ["Content-Type", "Authorization", "X-CSRF-Token"]
+
+# Service Configuration
+services:
+  user_service:
+    port: 8001
+    https: true
+    rate_limit: 1000  # requests per minute
+    
+  order_service:
+    port: 8002
+    https: true
+    rate_limit: 500
+    
+  payment_service:
+    port: 8003
+    https: true
+    rate_limit: 200
+
+# Database Configuration (Production)
+database:
+  type: "postgresql"  # Replace in-memory storage
+  host: "${DB_HOST}"
+  port: 5432
+  name: "${DB_NAME}"
+  user: "${DB_USER}"
+  password: "${DB_PASSWORD}"
+  ssl_mode: "require"
+  max_connections: 100
+
+# Monitoring & Observability
+monitoring:
+  prometheus:
+    enabled: true
+    port: 9090
+  grafana:
+    enabled: true
+    port: 3000
+  jaeger:
+    enabled: true
+    port: 16686
+
+# Kubernetes Production Settings
+kubernetes:
+  namespace: "microservices-prod"
+  replicas:
+    user_service: 3
+    order_service: 3
+    payment_service: 2
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"

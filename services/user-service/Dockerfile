@@ -1,6 +1,13 @@
-FROM python:3.13-slim
+FROM python:3.11-slim
 
 WORKDIR /app
+
+# Install system dependencies for building packages
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
 COPY requirements.txt .
