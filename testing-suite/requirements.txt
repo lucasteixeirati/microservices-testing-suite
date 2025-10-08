@@ -26,6 +26,9 @@ python-dateutil>=2.8.0
 pytz>=2023.3
 tqdm>=4.65.0
 
+# Docker integration for chaos tests
+docker>=7.0.0
+
 # Development tools
 black>=23.0.0
 flake8>=6.0.0

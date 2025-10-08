@@ -1,28 +1,338 @@
-name: Security Scan
+name: DevSecOps Security Pipeline
 
 on:
   push:
+    branches: [ main, develop ]
+  pull_request:
     branches: [ main ]
   schedule:
     - cron: '0 2 * * 1'  # Weekly on Monday
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: 'Type of security scan'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+        - full
+        - quick
+        - dependencies-only
+
+env:
+  SCAN_TYPE: ${{ github.event.inputs.scan_type || 'full' }}
 
 jobs:
-  security:
+  # SAST - Static Application Security Testing
+  sast-scan:
+    name: SAST Analysis (CodeQL)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: env.SCAN_TYPE == 'full' || env.SCAN_TYPE == 'quick'
+    
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'python', 'javascript', 'go' ]
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
     
-    - name: Run Trivy vulnerability scanner
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+        queries: security-extended,security-and-quality
+    
+    - name: Setup Language Environment
+      run: |
+        if [ "${{ matrix.language }}" = "python" ]; then
+          python -m pip install --upgrade pip
+          pip install -r services/user-service/requirements.txt
+        elif [ "${{ matrix.language }}" = "javascript" ]; then
+          cd services/order-service && npm install
+        elif [ "${{ matrix.language }}" = "go" ]; then
+          cd services/payment-service && go mod download
+        fi
+    
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:${{matrix.language}}"
+  
+  # Container & Dependency Scanning
+  vulnerability-scan:
+    name: Vulnerability Scanning (Trivy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Run Trivy Filesystem Scan
       uses: aquasecurity/trivy-action@master
       with:
         scan-type: 'fs'
         scan-ref: '.'
         format: 'sarif'
-        output: 'trivy-results.sarif'
+        output: 'trivy-fs-results.sarif'
+        severity: 'CRITICAL,HIGH,MEDIUM'
     
-    - name: Upload Trivy scan results
+    - name: Run Trivy Config Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'config'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-config-results.sarif'
+    
+    - name: Upload Trivy Filesystem Results
       uses: github/codeql-action/upload-sarif@v2
       if: always()
       with:
-        sarif_file: 'trivy-results.sarif'
+        sarif_file: 'trivy-fs-results.sarif'
+        category: 'trivy-filesystem'
+    
+    - name: Upload Trivy Config Results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-config-results.sarif'
+        category: 'trivy-config'
+  
+  # Dependency Scanning
+  dependency-scan:
+    name: Dependency Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: env.SCAN_TYPE == 'full' || env.SCAN_TYPE == 'dependencies-only'
+    
+    strategy:
+      matrix:
+        service: ['user-service', 'order-service', 'payment-service']
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Setup Python (for user-service)
+      if: matrix.service == 'user-service'
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+    
+    - name: Setup Node.js (for order-service)
+      if: matrix.service == 'order-service'
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Setup Go (for payment-service)
+      if: matrix.service == 'payment-service'
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+    
+    - name: Install Dependencies and Scan
+      run: |
+        echo "🔍 Scanning dependencies for ${{ matrix.service }}..."
+        
+        if [ "${{ matrix.service }}" = "user-service" ]; then
+          cd services/user-service
+          pip install --upgrade pip
+          pip install safety bandit
+          
+          # Safety scan for known vulnerabilities
+          safety check --json --output safety-report.json || true
+          
+          # Bandit scan for security issues
+          bandit -r . -f json -o bandit-report.json || true
+          
+        elif [ "${{ matrix.service }}" = "order-service" ]; then
+          cd services/order-service
+          npm install
+          npm audit --audit-level=moderate --json > npm-audit.json || true
+          
+        elif [ "${{ matrix.service }}" = "payment-service" ]; then
+          cd services/payment-service
+          go mod download
+          
+          # Install gosec for Go security scanning
+          go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
+          gosec -fmt json -out gosec-report.json ./... || true
+        fi
+    
+    - name: Upload Dependency Scan Results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: dependency-scan-${{ matrix.service }}
+        path: |
+          services/${{ matrix.service }}/*-report.json
+          services/${{ matrix.service }}/npm-audit.json
+        retention-days: 30
+  
+  # Secret Scanning
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: env.SCAN_TYPE == 'full' || env.SCAN_TYPE == 'quick'
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for better secret detection
+    
+    - name: Install TruffleHog
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+    
+    - name: Run TruffleHog Secret Scan
+      run: |
+        echo "🕵️ Scanning for secrets and credentials..."
+        
+        # Scan filesystem
+        trufflehog filesystem . \
+          --json \
+          --no-update \
+          --exclude-paths=.git \
+          > trufflehog-results.json || true
+        
+        # Scan git history
+        trufflehog git file://. \
+          --json \
+          --no-update \
+          --since-commit=HEAD~10 \
+          >> trufflehog-results.json || true
+        
+        # Check if secrets were found
+        if [ -s trufflehog-results.json ]; then
+          echo "⚠️ Potential secrets detected!"
+          echo "Results saved to trufflehog-results.json"
+        else
+          echo "✅ No secrets detected"
+        fi
+    
+    - name: Upload Secret Scan Results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: secret-scan-results
+        path: trufflehog-results.json
+        retention-days: 30
+  
+  # Security Reporting
+  security-report:
+    name: Security Dashboard
+    runs-on: ubuntu-latest
+    needs: [sast-scan, vulnerability-scan, dependency-scan, secret-scan]
+    if: always() && (env.SCAN_TYPE == 'full' || env.SCAN_TYPE == 'quick')
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+    
+    - name: Download All Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: security-artifacts
+    
+    - name: Generate Security Report
+      run: |
+        echo "📊 Generating comprehensive security report..."
+        
+        # Create security report directory
+        mkdir -p security-reports
+        
+        # Generate summary report
+        cat > security-reports/security-summary.md << 'EOF'
+        # 🔒 Security Scan Summary
+        
+        **Scan Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        **Repository:** ${{ github.repository }}
+        **Commit:** ${{ github.sha }}
+        **Scan Type:** ${{ env.SCAN_TYPE }}
+        
+        ## 📊 Scan Results Overview
+        
+        | Security Check | Status | Details |
+        |----------------|--------|----------|
+        | SAST (CodeQL) | ${{ needs.sast-scan.result }} | Static code analysis |
+        | Vulnerability Scan | ${{ needs.vulnerability-scan.result }} | Container & dependency vulnerabilities |
+        | Dependency Scan | ${{ needs.dependency-scan.result }} | Known vulnerable dependencies |
+        | Secret Scan | ${{ needs.secret-scan.result }} | Hardcoded credentials detection |
+        
+        ## 🎯 Services Analyzed
+        
+        - **User Service** (Python/FastAPI) - Port 8001
+        - **Order Service** (Node.js/Express) - Port 8002  
+        - **Payment Service** (Go/Gin) - Port 8003
+        
+        ## 🔧 Security Tools Used
+        
+        - **CodeQL**: SAST analysis for Python, JavaScript, Go
+        - **Trivy**: Vulnerability scanning for containers and configs
+        - **Safety/Bandit**: Python security scanning
+        - **npm audit**: Node.js dependency vulnerabilities
+        - **gosec**: Go security analyzer
+        - **TruffleHog**: Secret detection in code and git history
+        
+        ## 📝 Next Steps
+        
+        1. Review detailed findings in GitHub Security tab
+        2. Prioritize CRITICAL and HIGH severity issues
+        3. Update vulnerable dependencies
+        4. Fix any detected secrets immediately
+        5. Re-run security scan after fixes
+        
+        ---
+        
+        **Generated by:** AI-Powered Microservices Testing Suite
+        **Pipeline:** DevSecOps Security Pipeline
+        EOF
+        
+        # List all artifacts found
+        echo "📎 Security artifacts collected:"
+        find security-artifacts -type f -name "*.json" | head -20
+        
+        echo "✅ Security report generated"
+    
+    - name: Upload Security Report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-dashboard-${{ github.run_number }}
+        path: |
+          security-reports/
+          security-artifacts/
+        retention-days: 90
+    
+    - name: Security Summary
+      if: always()
+      run: |
+        echo "🔒 DevSecOps Security Pipeline Summary"
+        echo "================================================"
+        echo "SAST Analysis: ${{ needs.sast-scan.result }}"
+        echo "Vulnerability Scan: ${{ needs.vulnerability-scan.result }}"
+        echo "Dependency Scan: ${{ needs.dependency-scan.result }}"
+        echo "Secret Scan: ${{ needs.secret-scan.result }}"
+        echo "================================================"
+        echo "Languages Analyzed: Python, JavaScript, Go"
+        echo "Services Scanned: 3 microservices"
+        echo "Security Tools: 6+ specialized scanners"
+        echo "================================================"
+        echo "✅ Security pipeline completed - Check Security tab for findings"

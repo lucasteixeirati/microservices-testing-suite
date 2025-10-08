@@ -5,15 +5,15 @@
 O projeto foi otimizado para usar dependências que **não exigem** as Ferramentas de Build do Microsoft C++. A instalação agora é direta:
 
 ### **Pré-requisitos:**
-- **Python 3.11+** - https://www.python.org/downloads/ (✅ Marcar "Add Python to PATH")
+- **Python 3.13** - https://www.python.org/downloads/ 
 - **Node.js 18+** - https://nodejs.org/
-- **Go 1.21+** - https://golang.org/dl/ (Baixar `go1.21.x.windows-amd64.msi`)
+- **Go 1.21+** - https://golang.org/dl/ 
 
 **⚠️ IMPORTANTE: Reinicie o terminal/VS Code após instalar Go**
 
 ### **Verificar Instalação:**
 ```bash
-python --version  # Deve mostrar 3.11+
+python --version  # Deve mostrar 3.13+
 node --version    # Deve mostrar 18+
 go version        # Deve mostrar 1.21+
 ```
@@ -23,8 +23,8 @@ go version        # Deve mostrar 1.21+
 ## 🚀 **Instalação Passo a Passo**
 
 ### **Passo 1: Navegar para o Projeto**
-```bash
-cd C:\Users\Lucas\Downloads\microservices-testing-suite
+```criar pasta para o projeto exemplo:
+cd C:\Users\microservices-testing-suite
 ```
 
 ### **Passo 2: Instalar Dependências dos Serviços**
@@ -378,8 +378,6 @@ AI Simple ML Demo - Testing Intelligence
 
 ---
 
-**📅 Criado em:** 25/09/2024  
-**📅 Atualizado em:** 26/12/2024  
 **👨💻 DevOps Engineer:** Lucas Teixeira  
 **🎯 Projeto:** AI-Powered Microservices Testing Suite  
 **📊 Status:** Instalação 100% Funcional  

@@ -11,7 +11,7 @@ import asyncio
 from contextlib import asynccontextmanager
 
 # Optimized connection pool and rate limiting
-connection_pool = asyncio.Semaphore(200)  # Increased concurrent connections
+connection_pool = asyncio.Semaphore(500)  # Much higher concurrent connections
 rate_limiter = TTLCache(maxsize=10000, ttl=60)  # Rate limit per IP per minute
 email_cache = TTLCache(maxsize=5000, ttl=300)  # Cache for email lookups
 
@@ -91,6 +91,7 @@ async def get_csrf_token():
 
 @app.get("/health")
 async def health_check():
+    # Remove connection pool from health check for faster response
     return {"status": "healthy", "service": "user-service"}
 
 @app.post("/users", response_model=User)
@@ -124,16 +125,16 @@ async def create_user(user_data: CreateUserRequest, request: Request, csrf_token
 
 @app.get("/users/{user_id}", response_model=User)
 async def get_user(user_id: str):
-    async with connection_pool:  # Add connection pooling
-        user = users_db.get(user_id)
-        if user is None:
-            raise HTTPException(status_code=404, detail="User not found")
-        return user
+    # Remove connection pool for simple read operations
+    user = users_db.get(user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
 @app.get("/users", response_model=List[User])
 async def list_users():
-    async with connection_pool:  # Add connection pooling
-        return list(users_db.values())
+    # Remove connection pool for simple read operations
+    return list(users_db.values())
 
 @app.delete("/users/{user_id}")
 async def delete_user(user_id: str, request: Request, csrf_token: str = Depends(verify_csrf_token)):
