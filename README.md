@@ -160,11 +160,6 @@ run-chaos-tests-docker.bat
 | **[CICD_GUIDE.md](CICD_GUIDE.md)** | Pipeline DevSecOps completo |
 | **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** | Soluções para problemas comuns |
 
-### **Relatórios de Análise:**
-- **[TESTING_ANALYSIS_REPORT_UPDATED.md](TESTING_ANALYSIS_REPORT_UPDATED.md)** - Status atual completo
-- **[CHAOS_TESTS_IMPROVEMENT_SUMMARY.md](CHAOS_TESTS_IMPROVEMENT_SUMMARY.md)** - Melhorias implementadas
-- **[DEPENDENCIES_STATUS.md](DEPENDENCIES_STATUS.md)** - Status das dependências
-
 ---
 
 ## 🎯 **Casos de Uso**
