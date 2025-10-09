@@ -4,6 +4,7 @@ pytest-html==4.1.1
 pytest-cov==5.0.0
 pytest-xdist>=3.6.1
 requests==2.32.3
+httpx>=0.25.0
 locust==2.31.8
 
 # AI/ML dependencies (Python 3.13 compatible)
