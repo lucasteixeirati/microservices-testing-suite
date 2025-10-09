@@ -1,28 +1,14 @@
 {
-  "timestamp": "2025-10-06T17:57:05.515566",
+  "timestamp": "2025-10-09T11:54:26.892659",
   "test_generation": {
-    "total_tests_generated": 13,
-    "services_analyzed": 3,
+    "total_tests_generated": 0,
+    "services_analyzed": 0,
     "report": {
-      "total_tests": 13,
-      "by_type": {
-        "API": 6,
-        "SECURITY": 3,
-        "VALIDATION": 3,
-        "ERROR_HANDLING": 1
-      },
-      "by_priority": {
-        "HIGH": 9,
-        "MEDIUM": 4
-      },
-      "by_risk": {
-        "MEDIUM": 9,
-        "HIGH": 3,
-        "LOW": 1
-      },
-      "recommendations": [
-        "Focus on 3 high-risk test cases first"
-      ]
+      "total_tests": 0,
+      "by_type": {},
+      "by_priority": {},
+      "by_risk": {},
+      "recommendations": []
     },
     "success": true
   },
@@ -38,8 +24,8 @@
     "report": {
       "summary": {
         "total_log_entries": 50,
-        "high_probability_bugs": 16,
-        "bug_detection_rate": 0.32,
+        "high_probability_bugs": 15,
+        "bug_detection_rate": 0.3,
         "ml_model_active": false,
         "accuracy_score": 0.0
       },
@@ -48,83 +34,84 @@
           {
             "cluster_id": 0,
             "size": 22,
-            "avg_probability": 0.9181818181818181,
+            "avg_probability": 0.9045454545454544,
             "common_patterns": [
               "authentication_failure",
-              "validation_error",
-              "null_pointer"
+              "null_pointer",
+              "validation_error"
             ],
             "services_affected": [
-              "api-gateway",
-              "user-service",
               "payment-service",
-              "order-service"
+              "order-service",
+              "api-gateway",
+              "user-service"
             ]
           },
           {
             "cluster_id": 1,
-            "size": 14,
-            "avg_probability": 0.10000000000000002,
-            "common_patterns": [],
+            "size": 19,
+            "avg_probability": 0.20526315789473687,
+            "common_patterns": [
+              "rate_limit"
+            ],
             "services_affected": [
-              "user-service",
-              "api-gateway",
               "payment-service",
-              "order-service"
+              "order-service",
+              "api-gateway",
+              "user-service"
             ]
           },
           {
             "cluster_id": 2,
-            "size": 14,
-            "avg_probability": 0.6571428571428571,
+            "size": 9,
+            "avg_probability": 0.7,
             "common_patterns": [
-              "connection_timeout",
-              "rate_limit"
+              "connection_timeout"
             ],
             "services_affected": [
-              "api-gateway",
-              "user-service",
               "payment-service",
-              "order-service"
+              "order-service",
+              "user-service",
+              "api-gateway"
             ]
           }
         ],
         "anomalies_detected": [],
         "trend_predictions": {
-          "trend_direction": "STABLE",
-          "projected_daily_bugs": 24,
+          "trend_direction": "INCREASING",
+          "projected_daily_bugs": 48,
           "confidence": 1.0,
-          "next_spike_probability": 0.3224091025988618
+          "next_spike_probability": 0.3344887382997859
         },
         "risk_score": "HIGH"
       },
       "top_patterns": [
         {
           "pattern": "connection_timeout",
-          "count": 11,
-          "percentage": 22.0,
+          "count": 9,
+          "percentage": 18.0,
           "severity_avg": 1.0
         },
         {
           "pattern": "authentication_failure",
-          "count": 7,
-          "percentage": 14.000000000000002,
-          "severity_avg": 3.0
-        },
-        {
-          "pattern": "validation_error",
-          "count": 6,
-          "percentage": 12.0,
+          "count": 8,
+          "percentage": 16.0,
           "severity_avg": 3.0
         },
         {
           "pattern": "rate_limit",
-          "count": 3,
-          "percentage": 6.0,
+          "count": 5,
+          "percentage": 10.0,
           "severity_avg": 1.0
         },
         {
           "pattern": "null_pointer",
+          "count": 4,
+          "percentage": 8.0,
+          "severity_avg": 3.0
+        },
+        {
+          "pattern": "validation_error",
           "count": 3,
           "percentage": 6.0,
           "severity_avg": 3.0
@@ -147,23 +134,23 @@
     "execution_plan": {
       "summary": {
         "total_tests": 20,
-        "estimated_time_minutes": 41.30199516643541,
+        "estimated_time_minutes": 58.28443257581953,
         "ml_model_active": false,
-        "optimization_score": 0.382003459295132
+        "optimization_score": 0.24674273222113619
       },
       "ml_insights": {
         "feature_importance": {},
         "priority_distribution": {
-          "mean_priority": 0.35386408336397107,
-          "std_priority": 0.09928932480065603,
+          "mean_priority": 0.37537884973890934,
+          "std_priority": 0.10481008008588553,
           "high_priority_ratio": 0.0,
-          "low_priority_ratio": 0.4
+          "low_priority_ratio": 0.25
         },
         "risk_patterns": [],
         "optimization_opportunities": [
           {
             "type": "FLAKY_TESTS",
-            "description": "1 tests with high failure rate",
+            "description": "4 tests with high failure rate",
             "action": "Investigate and stabilize flaky tests"
           }
         ]
@@ -171,82 +158,82 @@
       "optimal_sequence": [
         {
           "position": 1,
-          "test_name": "test_sample_10",
-          "priority_score": 0.5156496195486568,
-          "efficiency_ratio": 0.024404386697614407,
+          "test_name": "test_sample_19",
+          "priority_score": 0.5763016338282498,
+          "efficiency_ratio": 0.012765457255571757,
           "estimated_start_time": 0
         },
         {
           "position": 2,
-          "test_name": "test_sample_9",
-          "priority_score": 0.4076400904982658,
-          "efficiency_ratio": 0.017333068380006884,
-          "estimated_start_time": 21.129382431850374
+          "test_name": "test_sample_13",
+          "priority_score": 0.5070581495554484,
+          "efficiency_ratio": 0.006402477588783115,
+          "estimated_start_time": 45.14539685421066
         },
         {
           "position": 3,
-          "test_name": "test_sample_16",
-          "priority_score": 0.4045761558272668,
-          "efficiency_ratio": 0.005591613652891197,
-          "estimated_start_time": 44.647439452179505
+          "test_name": "test_sample_15",
+          "priority_score": 0.43421987266636325,
+          "efficiency_ratio": 0.004765534119169877,
+          "estimated_start_time": 124.34257365398486
         },
         {
           "position": 4,
-          "test_name": "test_sample_12",
-          "priority_score": 0.33961821958819766,
-          "efficiency_ratio": 0.005590921879067046,
-          "estimated_start_time": 117.00153630901025
+          "test_name": "test_sample_18",
+          "priority_score": 0.41998354098202956,
+          "efficiency_ratio": 0.00357130475127564,
+          "estimated_start_time": 215.4593009311366
         },
         {
           "position": 5,
-          "test_name": "test_sample_19",
-          "priority_score": 0.39078472871501596,
-          "efficiency_ratio": 0.005076253861411197,
-          "estimated_start_time": 177.74611956991419
+          "test_name": "test_sample_1",
+          "priority_score": 0.35083486722553253,
+          "efficiency_ratio": 0.0034197853039052597,
+          "estimated_start_time": 333.05876953767734
         },
         {
           "position": 6,
-          "test_name": "test_sample_4",
-          "priority_score": 0.4836348034527182,
-          "efficiency_ratio": 0.005005529412958375,
-          "estimated_start_time": 254.7290166794724
+          "test_name": "test_sample_11",
+          "priority_score": 0.33267969018936167,
+          "efficiency_ratio": 0.00338335567870957,
+          "estimated_start_time": 435.6485042864913
         },
         {
           "position": 7,
-          "test_name": "test_sample_8",
-          "priority_score": 0.2677829553038149,
-          "efficiency_ratio": 0.004666839208947071,
-          "estimated_start_time": 351.34912687214825
+          "test_name": "test_sample_12",
+          "priority_score": 0.47892136890874604,
+          "efficiency_ratio": 0.0029448996974708753,
+          "estimated_start_time": 533.9768273424484
         },
         {
           "position": 8,
-          "test_name": "test_sample_0",
-          "priority_score": 0.42980796876692623,
-          "efficiency_ratio": 0.0036420012320588025,
-          "estimated_start_time": 408.72906719459013
+          "test_name": "test_sample_3",
+          "priority_score": 0.5118611241840763,
+          "efficiency_ratio": 0.002658303479047374,
+          "estimated_start_time": 696.604223216084
         },
         {
           "position": 9,
-          "test_name": "test_sample_18",
-          "priority_score": 0.39432907897812713,
-          "efficiency_ratio": 0.003560302022785263,
-          "estimated_start_time": 526.7432965648417
+          "test_name": "test_sample_17",
+          "priority_score": 0.41905450462898874,
+          "efficiency_ratio": 0.002451194698513637,
+          "estimated_start_time": 889.1560248514286
         },
         {
           "position": 10,
-          "test_name": "test_sample_11",
-          "priority_score": 0.22738544745446293,
-          "efficiency_ratio": 0.0031686581577583437,
-          "estimated_start_time": 637.5004953795758
+          "test_name": "test_sample_10",
+          "priority_score": 0.5024639011634072,
+          "efficiency_ratio": 0.0021783330699121253,
+          "estimated_start_time": 1060.1153145737408
         }
       ],
       "execution_phases": {},
       "advanced_recommendations": [
-        "Prioritize 4 security tests in every build"
+        "Prioritize 2 security tests in every build"
       ],
       "performance_predictions": {
-        "estimated_total_time_minutes": 41.30199516643541,
-        "parallel_execution_time_minutes": 5.162749395804426,
+        "estimated_total_time_minutes": 58.28443257581953,
+        "parallel_execution_time_minutes": 7.285554071977441,
         "expected_failures": 11,
         "success_probability": 1.0,
         "bottleneck_tests": []
@@ -261,28 +248,28 @@
     },
     "top_priorities": [
       {
+        "name": "test_sample_19",
+        "score": 0.5763016338282498,
+        "risk": "MEDIUM"
+      },
+      {
+        "name": "test_sample_3",
+        "score": 0.5118611241840763,
+        "risk": "MEDIUM"
+      },
+      {
         "name": "test_sample_13",
-        "score": 0.5691535064072231,
+        "score": 0.5070581495554484,
         "risk": "MEDIUM"
       },
       {
         "name": "test_sample_10",
-        "score": 0.5156496195486568,
+        "score": 0.5024639011634072,
         "risk": "MEDIUM"
       },
       {
-        "name": "test_sample_4",
-        "score": 0.4836348034527182,
-        "risk": "MEDIUM"
-      },
-      {
-        "name": "test_sample_0",
-        "score": 0.42980796876692623,
-        "risk": "MEDIUM"
-      },
-      {
-        "name": "test_sample_9",
-        "score": 0.4076400904982658,
+        "name": "test_sample_12",
+        "score": 0.47892136890874604,
         "risk": "MEDIUM"
       }
     ],
@@ -331,22 +318,22 @@
       "failure_predictor": {
         "trained": true,
         "metrics": {},
-        "last_update": "2025-10-06T17:57:07.312157"
+        "last_update": "2025-10-09T11:54:28.346820"
       },
       "priority_optimizer": {
         "trained": false,
         "metrics": {},
-        "last_update": "2025-10-06T17:57:07.312163"
+        "last_update": "2025-10-09T11:54:28.346829"
       },
       "flakiness_detector": {
         "trained": false,
         "metrics": {},
-        "last_update": "2025-10-06T17:57:07.312166"
+        "last_update": "2025-10-09T11:54:28.346832"
       },
       "performance_predictor": {
         "trained": false,
         "metrics": {},
-        "last_update": "2025-10-06T17:57:07.312167"
+        "last_update": "2025-10-09T11:54:28.346834"
       }
     },
     "high_risk_tests": 0,
@@ -419,13 +406,5 @@
     "slow_tests": 0,
     "success": true
   },
-  "recommendations": [
-    {
-      "category": "TEST_GENERATION",
-      "priority": "HIGH",
-      "title": "AI Generated 13 Test Cases",
-      "description": "Review and integrate AI-generated test cases into test suite",
-      "action": "Implement generated test cases with highest risk scores first"
-    }
-  ]
+  "recommendations": []
 }

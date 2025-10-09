@@ -10,16 +10,16 @@
 
 ---
 
-## 🎯 **O que é este projeto?**
+## 🎯 **Visão Geral**
 
-Demonstração **enterprise-grade** combinando:
-- **3 Microserviços** (Python, Node.js, Go)
-- **131+ Testes Automatizados** (8 categorias)
+Demonstração **enterprise-grade** que combina:
+- **3 Microserviços** (Python, Node.js, Go) com arquitetura moderna
+- **131+ Testes Automatizados** em 8 categorias diferentes
 - **7 Componentes de IA/ML** para testing inteligente
-- **13 Testes de Chaos Engineering** para resiliência
-- **CI/CD DevSecOps** completo
+- **13 Testes de Chaos Engineering** para validação de resiliência
+- **CI/CD DevSecOps** completo com 3 pipelines
 
-### **🏗️ Arquitetura**
+### **🏗️ Arquitetura Simplificada**
 ```
 User Service (Python) ←→ Order Service (Node.js) ←→ Payment Service (Go)
                     ↓
@@ -32,169 +32,117 @@ User Service (Python) ←→ Order Service (Node.js) ←→ Payment Service (Go)
 
 ## 🚀 **Quick Start**
 
-### **1. Pré-requisitos**
-- Python 3.13, Node.js 18+, Go 1.21+
-- Docker (opcional)
-
-### **2. Instalação Rápida**
+### **1. Instalação Rápida**
 ```bash
-# Clone e instale
 git clone <repo-url>
 cd microservices-testing-suite
 
-# Instalar dependências
+# Instalar todas as dependências
 cd services/user-service && pip install -r requirements.txt && cd ../..
 cd services/order-service && npm install && cd ../..
 cd services/payment-service && go mod tidy && cd ../..
 cd testing-suite && pip install -r requirements.txt && cd ..
 
-# Iniciar serviços
+# Iniciar todos os serviços
 run-local.bat
 ```
 
-### **3. Executar Testes**
+### **2. Executar Testes**
 ```bash
 cd testing-suite
 
-# Todos os testes (131+ cenários)
+# Todos os testes
 python utils/test_runner.py --test-type all
 
-# Testes específicos
-python utils/test_runner.py --test-type chaos    # 13 experimentos
-python utils/test_runner.py --test-type contract # 6 contratos
-python utils/test_runner.py --test-type load     # Performance
-```
-
-### **4. Componentes de IA**
-```bash
-# Teste rápido de todos os 7 componentes ML
+# Componentes de IA
 test-all-ml.bat
 
-# Dashboard de IA (http://localhost:5000)
+# Dashboard de IA
 python ai-testing/ai_testing_dashboard.py
 ```
 
----
-
-## 🧪 **Testing Suite - 131+ Cenários**
-
-| Tipo | Cenários | Status | Comando |
-|------|----------|--------|---------|
-| **Unit** | 68 | ✅ 100% | `--test-type unit` |
-| **Integration** | 27 | ✅ 85% | `--test-type integration` |
-| **Contract** | 6 | ✅ 100% | `--test-type contract` |
-| **Chaos** | 13 | ✅ 92% | `--test-type chaos` |
-| **Security** | 8 | ⚠️ 62% | `--test-type security` |
-| **Performance** | 14 | ❌ 21% | `--test-type performance` |
-| **API** | 13 | ✅ 100% | `--test-type api` |
-| **Load** | 1 suite | ⚠️ 70% | `--test-type load` |
+**Pré-requisitos:** Python 3.13, Node.js 18+, Go 1.21+
 
 ---
 
-## 🤖 **AI/ML Components - 7 Módulos**
+## 📊 **Resultados dos Testes**
 
-### **Componentes Funcionais:**
-1. **AI Test Case Generator** - Geração automática de testes
-2. **Bug Pattern Analyzer** - ML para detecção de padrões
-3. **Smart Test Prioritizer** - Priorização baseada em risco
-4. **Advanced ML Engine** - Múltiplos algoritmos
-5. **ML Integration Suite** - Pipeline end-to-end
-6. **AI Testing Dashboard** - Interface web
-7. **Simple ML Demo** - Demonstração básica
+| Categoria | Cenários | Status | Performance |
+|-----------|----------|--------|-------------|
+| **Unit** | 68 | ✅ 100% | Excelente |
+| **Integration** | 27 | ✅ 85% | Muito Boa |
+| **Contract** | 6 | ✅ 100% | Perfeita |
+| **Chaos** | 13 | ✅ 92% | Muito Boa |
+| **Security** | 8 | ⚠️ 62% | Em Melhoria |
+| **Performance** | 14 | ❌ 21% | Precisa Atenção |
+| **API** | 13 | ✅ 100% | Perfeita |
+| **Load** | 1 suite | ⚠️ 70% | Boa |
 
-### **Algoritmos Implementados:**
-Random Forest, Isolation Forest, K-means, DBSCAN, Gradient Boosting, Neural Networks
+**Total:** 131+ cenários automatizados
 
 ---
 
-## 🌪️ **Chaos Engineering - 13 Experimentos**
+## 🤖 **Componentes de IA/ML**
 
-### **Testes Implementados:**
-- ✅ Service Restart/Kill/Recovery (6 básicos)
-- ✅ Memory/CPU/Network Stress (4 avançados)
-- ✅ Cascade Failures & Dependencies (3 complexos)
+**7 Módulos Funcionais:**
+1. **AI Test Case Generator** - Geração automática de casos de teste
+2. **Bug Pattern Analyzer** - Detecção inteligente de padrões de bugs
+3. **Smart Test Prioritizer** - Priorização baseada em risco e ML
+4. **Advanced ML Engine** - Motor com múltiplos algoritmos
+5. **ML Integration Suite** - Pipeline completo de ML
+6. **AI Testing Dashboard** - Interface web para visualização
+7. **Simple ML Demo** - Demonstração básica dos conceitos
 
-### **Execução:**
-```bash
-# Local (recomendado)
-run-chaos-tests.bat
-
-# Docker (manipulação de containers)
-run-chaos-tests-docker.bat
-```
-
-**Taxa de Sucesso:** 92.3% (12/13 testes)
+**Algoritmos:** Random Forest, Isolation Forest, K-means, DBSCAN, Gradient Boosting, Neural Networks
 
 ---
 
 ## 🏗️ **Serviços**
 
-| Serviço | Tecnologia | Porta | Features |
-|---------|------------|-------|----------|
-| **User** | Python/FastAPI | 8001 | CRUD, Logging, Health |
-| **Order** | Node.js/Express | 8002 | Pedidos, Validação |
-| **Payment** | Go/Gin | 8003 | Pagamentos, Processing |
+| Serviço | Tecnologia | Porta | Status |
+|---------|------------|-------|--------|
+| **User** | Python/FastAPI | 8001 | ✅ Ativo |
+| **Order** | Node.js/Express | 8002 | ✅ Ativo |
+| **Payment** | Go/Gin | 8003 | ✅ Ativo |
 
 **Health Checks:** `http://localhost:800X/health`
 
 ---
 
-## 🔄 **CI/CD & DevSecOps**
+## 📚 **Documentação Especializada**
 
-### **3 Pipelines Production-Ready:**
-- **CI Pipeline** - 131+ testes automatizados
-- **Deploy Pipeline** - Multi-cloud (AWS/GCP/Azure)
-- **Security Pipeline** - SAST, vulnerability scan, secrets
-
-**Status:** 100% funcional com deploy automatizado
-
----
-
-## 📚 **Documentação Completa**
-
-| Arquivo | Propósito |
-|---------|-----------|
-| **[INSTALL.md](INSTALL.md)** | Guia de instalação detalhado |
-| **[TESTING_GUIDE.md](TESTING_GUIDE.md)** | Como executar todos os testes |
-| **[ARCHITECTURE.md](ARCHITECTURE.md)** | Diagramas e componentes técnicos |
-| **[CICD_GUIDE.md](CICD_GUIDE.md)** | Pipeline DevSecOps completo |
-| **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** | Soluções para problemas comuns |
+| Guia | Foco | Quando Usar |
+|------|------|-------------|
+| **[INSTALL.md](INSTALL.md)** | Instalação detalhada | Configuração inicial |
+| **[TESTING_GUIDE.md](TESTING_GUIDE.md)** | Execução de testes | Executar e entender testes |
+| **[AI_ML_DEEP_DIVE_GUIDE.md](AI_ML_DEEP_DIVE_GUIDE.md)** | IA/ML em QA | Aprender sobre componentes ML |
+| **[ARCHITECTURE.md](ARCHITECTURE.md)** | Arquitetura técnica | Entender design e componentes |
+| **[CICD_GUIDE.md](CICD_GUIDE.md)** | DevSecOps | Configurar pipelines |
+| **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** | Solução de problemas | Resolver erros comuns |
 
 ---
 
 ## 🎯 **Casos de Uso**
 
-### **Para QA Engineers:**
-- Suite completa de testes automatizados
-- Componentes de IA para testing inteligente
-- Chaos engineering para validação de resiliência
-
-### **Para DevOps:**
-- CI/CD pipeline production-ready
-- Multi-cloud deployment
-- Observabilidade completa
-
-### **Para Desenvolvedores:**
-- Arquitetura de microserviços moderna
-- Exemplos de 3 linguagens (Python, Node.js, Go)
-- Service mesh com Istio
+**QA Engineers:** Suite completa + IA para testing inteligente + Chaos engineering
+**DevOps:** CI/CD production-ready + Multi-cloud + Observabilidade
+**Desenvolvedores:** Arquitetura moderna + 3 linguagens + Service mesh
 
 ---
 
 ## 🚀 **Próximos Passos**
 
-1. **Instale** seguindo o Quick Start
-2. **Execute** os testes para ver funcionando
-3. **Explore** os componentes de IA
-4. **Teste** chaos engineering
-5. **Consulte** a documentação para detalhes
+1. **[Instale](INSTALL.md)** seguindo o guia detalhado
+2. **[Execute os testes](TESTING_GUIDE.md)** para validar funcionamento
+3. **[Explore os componentes de IA](AI_ML_DEEP_DIVE_GUIDE.md)** para entender ML
+4. **[Configure CI/CD](CICD_GUIDE.md)** para automação completa
+5. **[Consulte troubleshooting](TROUBLESHOOTING.md)** se encontrar problemas
 
 ---
 
 ## 👨💻 **Autor**
 
-**Lucas Teixeira**
-- QA Senior + AI/ML Testing Specialist
+**Lucas Teixeira** - QA Senior + AI/ML Testing Specialist
 - LinkedIn: [lucas-teixeira-67b08b47](https://linkedin.com/in/lucas-teixeira-67b08b47)
 - Email: lucasteixeira.ti@gmail.com
 
