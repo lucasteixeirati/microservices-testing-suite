@@ -28,7 +28,7 @@ jobs:
     name: SAST Analysis (CodeQL)
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: env.SCAN_TYPE == 'full' || env.SCAN_TYPE == 'quick'
+    if: github.event.inputs.scan_type == 'full' || github.event.inputs.scan_type == 'quick' || github.event.inputs.scan_type == null
     
     permissions:
       actions: read
@@ -112,7 +112,7 @@ jobs:
     name: Dependency Security Scan
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: env.SCAN_TYPE == 'full' || env.SCAN_TYPE == 'dependencies-only'
+    if: github.event.inputs.scan_type == 'full' || github.event.inputs.scan_type == 'dependencies-only' || github.event.inputs.scan_type == null
     
     strategy:
       matrix:
@@ -184,7 +184,7 @@ jobs:
     name: Secret Detection
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: env.SCAN_TYPE == 'full' || env.SCAN_TYPE == 'quick'
+    if: github.event.inputs.scan_type == 'full' || github.event.inputs.scan_type == 'quick' || github.event.inputs.scan_type == null
     
     steps:
     - name: Checkout Code
@@ -235,7 +235,7 @@ jobs:
     name: Security Dashboard
     runs-on: ubuntu-latest
     needs: [sast-scan, vulnerability-scan, dependency-scan, secret-scan]
-    if: always() && (env.SCAN_TYPE == 'full' || env.SCAN_TYPE == 'quick')
+    if: always() && (github.event.inputs.scan_type == 'full' || github.event.inputs.scan_type == 'quick' || github.event.inputs.scan_type == null)
     
     steps:
     - name: Checkout Code
