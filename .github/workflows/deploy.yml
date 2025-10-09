@@ -44,12 +44,12 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Setup kubectl
-      uses: azure/setup-kubectl@v3
+      uses: azure/setup-kubectl@v4
       with:
         version: 'v1.28.0'
     
     - name: Setup Helm
-      uses: azure/setup-helm@v3
+      uses: azure/setup-helm@v4
       with:
         version: '3.12.0'
     
