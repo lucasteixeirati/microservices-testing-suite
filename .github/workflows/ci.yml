@@ -344,5 +344,5 @@ jobs:
         echo "Services Tested: 3 (Python/FastAPI, Node.js/Express, Go/Gin)"
         echo "============================================================"
         echo "[SUCCESS] CI Pipeline completed - Check artifacts for detailed reports"
-echo "Python version: $(python --version)"
-echo "Pip packages: $(pip list | grep -E '(fastapi|pydantic|pytest|scikit-learn)')"
+        echo "Python version: $(python --version)"
+        echo "Pip packages: $(pip list | grep -E '(fastapi|pydantic|pytest|scikit-learn)')"
