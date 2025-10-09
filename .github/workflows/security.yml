@@ -126,7 +126,7 @@ jobs:
       if: matrix.service == 'user-service'
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13'
+        python-version: '3.12'
     
     - name: Setup Node.js (for order-service)
       if: matrix.service == 'order-service'
@@ -244,7 +244,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13'
+        python-version: '3.12'
     
     - name: Download All Artifacts
       uses: actions/download-artifact@v4
