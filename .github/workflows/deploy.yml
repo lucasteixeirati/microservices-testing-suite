@@ -239,9 +239,9 @@ jobs:
         
         # Check service health internally
         echo "Checking internal service health..."
-        kubectl exec -n microservices deployment/user-service -- curl -f http://localhost:8001/health || echo "User service health check failed"
-        kubectl exec -n microservices deployment/order-service -- curl -f http://localhost:8002/health || echo "Order service health check failed"
-        kubectl exec -n microservices deployment/payment-service -- curl -f http://localhost:8003/health || echo "Payment service health check failed"
+        kubectl exec -n microservices deployment/user-service -- curl -f http://localhost:8001/health
+        kubectl exec -n microservices deployment/order-service -- curl -f http://localhost:8002/health
+        kubectl exec -n microservices deployment/payment-service -- curl -f http://localhost:8003/health
         
         echo "✅ Deployment verification completed"
     
@@ -272,7 +272,7 @@ jobs:
         # Run smoke tests
         cd testing-suite
         echo "Running critical smoke tests..."
-        python -m pytest integration-tests/test_end_to_end_flow.py::TestEndToEndFlow::test_complete_order_flow -v --tb=short || echo "Smoke test completed with warnings"
+        python -m pytest integration-tests/test_end_to_end_flow.py::TestEndToEndFlow::test_complete_order_flow -v --tb=short
         
         # Cleanup port forwarding
         kill $PF_USER_PID $PF_ORDER_PID $PF_PAYMENT_PID 2>/dev/null || true

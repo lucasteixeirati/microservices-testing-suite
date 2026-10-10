@@ -1,5 +1,5 @@
 # Multi-stage build for Go Payment Service
-FROM golang:1.21-alpine as builder
+FROM golang:1.21-alpine AS builder
 
 # Install git and ca-certificates
 RUN apk add --no-cache git ca-certificates

@@ -19,10 +19,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Setup Python 3.12
+    - name: Setup Python 3.13
       uses: actions/setup-python@v5
       with:
-        python-version: '3.12'
+        python-version: '3.13'
         cache: 'pip'
     
     - name: Setup Node.js 18
@@ -171,84 +171,121 @@ jobs:
         
         echo "[SUCCESS] All services are healthy and ready for testing"
     
-    - name: Run Unit Tests (42 scenarios)
+    - name: Run Python Unit Tests with Coverage
+      id: python-unit
+      continue-on-error: true
       run: |
         cd testing-suite
         echo "[UNIT] Running Unit Tests..."
-        python -m pytest unit-tests/ -v --tb=short --maxfail=5
+        python -m pytest unit-tests/ -v --tb=short --maxfail=5 \
+          --junitxml=reports/junit-unit.xml \
+          --html=reports/unit-report.html --self-contained-html \
+          --cov=../services/user-service \
+          --cov-report=term-missing \
+          --cov-report=html:reports/coverage \
+          --cov-report=json:reports/coverage.json \
+          --cov-fail-under=80
         echo "[SUCCESS] Unit tests completed"
+
+    - name: Run Native Node.js Tests with Coverage
+      id: node-unit
+      continue-on-error: true
+      working-directory: services/order-service
+      run: npm run test:coverage
+
+    - name: Run Native Go Tests with Coverage
+      id: go-unit
+      continue-on-error: true
+      working-directory: services/payment-service
+      run: |
+        set -o pipefail
+        go test -race -coverprofile=coverage.out -covermode=atomic -json ./... | tee test-results.json
     
     - name: Run Contract Tests (6 scenarios)
+      id: contract
+      continue-on-error: true
       run: |
         cd testing-suite
         echo "[CONTRACT] Running Contract Tests..."
-        python -m pytest contract-tests/ -v --tb=short
+        python -m pytest contract-tests/ -v --tb=short --junitxml=reports/junit-contract.xml --html=reports/contract-report.html --self-contained-html
         echo "[SUCCESS] Contract tests completed"
     
     - name: Run Integration Tests (27 scenarios)
+      id: integration
+      continue-on-error: true
       run: |
         cd testing-suite
         echo "[INTEGRATION] Running Integration Tests..."
-        python -m pytest integration-tests/ -v --tb=short || echo "Integration tests completed with some failures (expected)"
+        python -m pytest integration-tests/ -v --tb=short --junitxml=reports/junit-integration.xml --html=reports/integration-report.html --self-contained-html
         echo "[SUCCESS] Integration tests completed"
     
     - name: Run Security Tests (8 scenarios)
+      id: security-tests
+      continue-on-error: true
       run: |
         cd testing-suite
         echo "[SECURITY] Running Security Tests..."
-        python -m pytest security-tests/ -v --tb=short
+        python -m pytest security-tests/ -v --tb=short --junitxml=reports/junit-security.xml --html=reports/security-report.html --self-contained-html
         echo "[SUCCESS] Security tests completed"
     
     - name: Run API Tests (13 scenarios)
+      id: api-tests
+      continue-on-error: true
       run: |
         cd testing-suite
         echo "[API] Running API Tests..."
-        python -m pytest api-tests/ -v --tb=short
+        python -m pytest api-tests/ -v --tb=short --junitxml=reports/junit-api.xml --html=reports/api-report.html --self-contained-html
         echo "[SUCCESS] API tests completed"
     
     - name: Run Performance Tests (14 scenarios)
+      id: performance
+      continue-on-error: true
       run: |
         cd testing-suite
         echo "[PERFORMANCE] Running Performance Tests..."
-        python -m pytest performance-tests/ -v --tb=short || echo "Performance tests completed with some failures (expected)"
+        python -m pytest performance-tests/ -v --tb=short --junitxml=reports/junit-performance.xml --html=reports/performance-report.html --self-contained-html
         echo "[SUCCESS] Performance tests completed"
     
     - name: Test AI/ML Components (7 modules)
+      id: ai-ml
+      continue-on-error: true
       run: |
         cd testing-suite
         echo "[AI/ML] Testing AI/ML Components..."
         
         # Test Simple ML Demo
         echo "Testing Simple ML Demo..."
-        python ai-testing/simple_ml_demo.py || echo "Simple ML Demo completed with warnings"
+        python ai-testing/simple_ml_demo.py
         
         # Test AI Test Case Generator
         echo "Testing AI Test Case Generator..."
-        python ai-testing/test_case_generator.py || echo "AI Test Case Generator completed with warnings"
+        python ai-testing/test_case_generator.py
         
         # Test Bug Pattern Analyzer
         echo "Testing Bug Pattern Analyzer..."
-        python ai-testing/bug_pattern_analyzer.py || echo "Bug Pattern Analyzer completed with warnings"
+        python ai-testing/bug_pattern_analyzer.py
         
         # Test Smart Test Prioritizer
         echo "Testing Smart Test Prioritizer..."
-        python ai-testing/smart_test_prioritizer.py || echo "Smart Test Prioritizer completed with warnings"
+        python ai-testing/smart_test_prioritizer.py
         
         # Test Advanced ML Engine
         echo "Testing Advanced ML Engine..."
-        python ai-testing/advanced_ml_engine.py || echo "Advanced ML Engine completed with warnings"
+        python ai-testing/advanced_ml_engine.py
         
         # Test ML Integration Suite
         echo "Testing ML Integration Suite..."
-        python ai-testing/ml_integration_demo.py || echo "ML Integration Suite completed with warnings"
+        python ai-testing/ml_integration_demo.py
         
         echo "[SUCCESS] All AI/ML components tested successfully"
     
     - name: Run Chaos Tests (Local Mode)
+      id: chaos
+      continue-on-error: true
       run: |
         cd testing-suite
         echo "[CHAOS] Running Chaos Tests (Local Mode)..."
-        python -m pytest chaos-tests/ -v --tb=short -k "not docker" || echo "Chaos tests completed with expected variations"
+        python -m pytest chaos-tests/ -v --tb=short -k "not docker" --junitxml=reports/junit-chaos.xml --html=reports/chaos-report.html --self-contained-html
         echo "[SUCCESS] Chaos tests completed"
     
     - name: Show Service Logs on Failure
@@ -302,13 +339,16 @@ jobs:
         echo "[SUCCESS] All services stopped"
     
     - name: Generate Comprehensive Test Reports
+      id: reports
+      continue-on-error: true
       if: always()
       run: |
         cd testing-suite
         echo "[REPORTS] Generating comprehensive test reports..."
         
         # Generate main test report
-        python utils/report_generator.py || echo "Main report generation completed with warnings"
+        python utils/report_generator.py
+        python utils/generate_test_dashboard.py
         
         # Generate ML analysis report if available
         if [ -f "reports_ml/analysis_report.json" ]; then
@@ -330,6 +370,9 @@ jobs:
           testing-suite/reports/
           testing-suite/ai-testing/reports_ml/
           testing-suite/utils/reports/
+          services/order-service/coverage/
+          services/payment-service/coverage.out
+          docs/evidence/
           *.log
         retention-days: 30
     
@@ -339,10 +382,40 @@ jobs:
         echo "[SUMMARY] AI-Powered Microservices Testing Suite - CI Summary"
         echo "============================================================"
         echo "Total Test Categories: 8 (Unit, Contract, Integration, Security, API, Performance, AI/ML, Chaos)"
-        echo "Total Test Scenarios: 131+"
+        cat docs/evidence/latest-test-summary.md >> "$GITHUB_STEP_SUMMARY"
         echo "AI/ML Components: 7 modules tested"
         echo "Services Tested: 3 (Python/FastAPI, Node.js/Express, Go/Gin)"
         echo "============================================================"
         echo "[SUCCESS] CI Pipeline completed - Check artifacts for detailed reports"
         echo "Python version: $(python --version)"
         echo "Pip packages: $(pip list | grep -E '(fastapi|pydantic|pytest|scikit-learn)')"
+
+    - name: Enforce Test Quality Gate
+      if: always()
+      env:
+        PYTHON_UNIT: ${{ steps.python-unit.outcome }}
+        NODE_UNIT: ${{ steps.node-unit.outcome }}
+        GO_UNIT: ${{ steps.go-unit.outcome }}
+        CONTRACT: ${{ steps.contract.outcome }}
+        INTEGRATION: ${{ steps.integration.outcome }}
+        SECURITY_TESTS: ${{ steps.security-tests.outcome }}
+        API_TESTS: ${{ steps.api-tests.outcome }}
+        PERFORMANCE: ${{ steps.performance.outcome }}
+        AI_ML: ${{ steps.ai-ml.outcome }}
+        CHAOS: ${{ steps.chaos.outcome }}
+        REPORTS: ${{ steps.reports.outcome }}
+      run: |
+        failed=0
+        for result in \
+          "python-unit:$PYTHON_UNIT" "node-unit:$NODE_UNIT" "go-unit:$GO_UNIT" \
+          "contract:$CONTRACT" "integration:$INTEGRATION" "security:$SECURITY_TESTS" \
+          "api:$API_TESTS" "performance:$PERFORMANCE" "ai-ml:$AI_ML" \
+          "chaos:$CHAOS" "reports:$REPORTS"; do
+          name="${result%%:*}"
+          outcome="${result#*:}"
+          if [ "$outcome" != "success" ]; then
+            echo "[FAILED] $name finished with outcome: $outcome"
+            failed=1
+          fi
+        done
+        exit "$failed"

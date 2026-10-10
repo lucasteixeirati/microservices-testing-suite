@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   user-service:
     build: ./services/user-service
@@ -21,6 +19,8 @@ services:
     depends_on:
       user-service:
         condition: service_healthy
+    environment:
+      USER_SERVICE_URL: http://user-service:8001
     networks:
       - microservices-net
     healthcheck:
@@ -37,6 +37,8 @@ services:
     depends_on:
       order-service:
         condition: service_healthy
+    environment:
+      ORDER_SERVICE_URL: http://order-service:8002
     networks:
       - microservices-net
     healthcheck:

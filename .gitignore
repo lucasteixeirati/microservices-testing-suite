@@ -88,6 +88,17 @@ coverage.xml
 # reports/ - KEPT
 # testing-suite/reports/ - KEPT
 
+# Reproducible CI outputs (uploaded as workflow artifacts)
+services/*/coverage/
+services/*/coverage.out
+services/*/test-results.json
+testing-suite/reports/junit-*.xml
+testing-suite/reports/coverage.json
+testing-suite/reports/coverage/
+testing-suite/reports/unit-report.html
+docs/evidence/latest-test-dashboard.html
+docs/evidence/latest-test-summary.md
+
 # -----------------------------------------------------------------------------
 # Logs & Temporary Data
 # -----------------------------------------------------------------------------

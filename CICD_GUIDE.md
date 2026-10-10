@@ -11,10 +11,11 @@ Este projeto implementa um pipeline CI/CD completo com **DevSecOps** para demons
 **Duração**: ~45 minutos
 **Funcionalidades**:
 - ✅ **Multi-linguagem**: Python 3.13, Node.js 18, Go 1.21
-- ✅ **131+ Testes**: 8 categorias completas (incluindo 13 testes de chaos)
+- ✅ **8 categorias de teste**: contagem e resultado publicados por execução
 - ✅ **7 Componentes IA/ML**: Testados automaticamente
 - ✅ **Health Checks**: Verificação robusta de serviços
 - ✅ **Relatórios**: Artefatos completos com retenção 30 dias
+- ✅ **Quality gate agregado**: todas as categorias executam; qualquer falha deixa o job vermelho ao final
 
 ### **2. Deploy Pipeline** (`deploy.yml`)
 **Trigger**: Push main, Tags, Manual
@@ -98,6 +99,8 @@ CLOUD_PROVIDER=aws  # ou gcp, azure
 ## 📊 **Resultados e Relatórios**
 
 ### **CI Pipeline**
+
+O pipeline preserva os resultados de todas as categorias com `continue-on-error` por etapa, mas aplica um quality gate final que falha o job se qualquer categoria não concluir com sucesso. Assim, uma falha não é ocultada e os relatórios das demais suítes continuam disponíveis para diagnóstico.
 - **Artifacts**: `test-reports-{run_number}`
 - **Conteúdo**: 
   - HTML reports de todos os testes
@@ -212,7 +215,7 @@ python -c "import sklearn, pandas, numpy, flask"
 - **CI Success Rate**: >95%
 - **Deploy Time**: <30 minutos
 - **Security Findings**: Tracked no GitHub Security
-- **Test Coverage**: 131+ cenários
+- **Test Coverage**: pytest-cov, Jest e Go coverage com artefatos no CI
 - **AI/ML Components**: 7 módulos validados
 
 ## 🚀 **Próximos Passos**
@@ -227,4 +230,4 @@ python -c "import sklearn, pandas, numpy, flask"
 
 **👨💻 Autor:** Lucas Teixeira - QA Senior + AI/ML Testing Specialist  
 **🎯 Objetivo:** Demonstração de expertise em DevSecOps e AI Testing  
-**📊 Status:** Production Ready - 100% Funcional
+**📊 Status:** Pipeline de referência com quality gates e evidências reproduzíveis

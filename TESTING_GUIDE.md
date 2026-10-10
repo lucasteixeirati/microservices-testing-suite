@@ -1,6 +1,6 @@
 # 🧪 Testing Guide - Guia Completo de Testes
 
-## 📊 **Visão Geral - 131+ Cenários de Teste**
+## 📊 **Visão Geral**
 
 ### **8 Tipos de Testes Implementados:**
 
@@ -8,7 +8,7 @@
 |------|----------|-----------|----------|
 | **Contract** | 6 | API contracts estruturais | `--test-type contract` |
 | **Integration** | 21 | End-to-end flows + error scenarios | `--test-type integration` |
-| **Unit** | 42 | Business logic (3 services) | `--test-type unit` |
+| **Unit** | Contagem automática | Python (pytest), Node.js (Jest) e Go (`go test`) | comandos abaixo |
 | **Performance** | 14 | Response time + throughput | `--test-type performance` |
 | **Security** | 8 | SQL injection + XSS + CSRF | `--test-type security` |
 | **API** | 13 | HTTP validation + error handling | `--test-type api` |
@@ -108,7 +108,7 @@ python ai-testing/advanced_ml_engine.py
 
 #### **6. ML Integration Suite**
 ```bash
-python ai-testing/ml_integration_demo_clean.py
+python ai-testing/ml_integration_demo.py
 ```
 - 🚀 Todos os componentes integrados
 - 📋 Relatório JSON completo
@@ -165,31 +165,24 @@ python ai-testing/ai_testing_dashboard.py
 - Special characters
 - Concurrent operations
 
-### **3. Unit Tests (42 cenários)**
+### **3. Unit Tests**
 **Propósito:** Lógica de negócio individual
 
-#### **User Service (8 testes):**
-- Health check, CRUD operations
-- Validation scenarios
+```bash
+# Python/FastAPI + regras e utilitários compartilhados
+cd testing-suite
+pytest unit-tests --cov=../services/user-service --cov-report=term-missing
 
-#### **Order Service (9 testes):**
-- Order creation, validation
-- Status updates, calculations
+# Node.js/Express exercitando handlers reais com Supertest
+cd ../services/order-service
+npm run test:coverage
 
-#### **Payment Service (11 testes):**
-- Payment processing
-- Method validation
-- Timeout scenarios
+# Go/Gin exercitando o router real com httptest
+cd ../payment-service
+go test -cover ./...
+```
 
-#### **Business Logic (10 testes):**
-- Email normalization
-- Name sanitization
-- ID generation uniqueness
-- Validation utilities
-
-#### **Validation Utils (7 testes):**
-- Comprehensive validation functions
-- Sanitization utilities
+As três suítes cobrem health checks, validação, CRUD, comunicação com dependências, SSRF allowlist, ciclo de pedidos/pagamentos e proteção CSRF para requisições de navegador. A contagem exata é publicada pelo CI, evitando números manuais desatualizados.
 
 ### **4. Performance Tests (14 cenários)**
 **Propósito:** Response time e throughput
@@ -346,7 +339,15 @@ pip install -r requirements.txt
 
 ### **Status Atual:**
 - **Total de Testes**: 118+ cenários implementados
-- **Taxa de Sucesso**: 100% nos testes executados
+- **Taxa de Sucesso**: calculada em cada execução a partir dos arquivos JUnit
+
+### **Dashboard visual e evidências**
+
+```bash
+python testing-suite/utils/generate_test_dashboard.py
+```
+
+O comando combina JUnit e as coberturas Python, Node.js e Go em `docs/evidence/latest-test-dashboard.html`. Os arquivos gerados são reproduzíveis e publicados como artefatos do GitHub Actions; capturas selecionadas podem ser adicionadas em `docs/evidence/screenshots/`.
 - **Cobertura de Serviços**: 3/3 microserviços testados
 - **Tipos de Teste**: 8 categorias completas
 - **Componentes ML**: 7 módulos funcionais
@@ -410,5 +411,5 @@ python utils/test_runner.py --test-type load --load-users 100
 
 **👨💻 QA Engineer:** Lucas Teixeira  
 **🎯 Projeto:** AI-Powered Microservices Testing Suite  
-**📊 Status:** 131+ Testes Funcionais + 7 Componentes ML  
+**📊 Status:** suíte multi-stack com resultados publicados por execução
 **🤖 AI Features:** Fully Implemented and Operational

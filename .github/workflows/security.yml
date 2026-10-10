@@ -45,7 +45,7 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
         queries: security-extended,security-and-quality
@@ -62,7 +62,7 @@ jobs:
         fi
     
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v3
       with:
         category: "/language:${{matrix.language}}"
   
@@ -122,7 +122,7 @@ jobs:
       if: matrix.service == 'user-service'
       uses: actions/setup-python@v5
       with:
-        python-version: '3.12'
+        python-version: '3.13'
     
     - name: Setup Node.js (for order-service)
       if: matrix.service == 'order-service'
@@ -153,8 +153,9 @@ jobs:
           
         elif [ "${{ matrix.service }}" = "order-service" ]; then
           cd services/order-service
-          npm install
-          npm audit --audit-level=moderate --json > npm-audit.json || true
+          npm ci
+          npm audit --omit=dev --audit-level=high --json > npm-audit-production.json
+          npm audit --audit-level=moderate --json > npm-audit-development.json || true
           
         elif [ "${{ matrix.service }}" = "payment-service" ]; then
           cd services/payment-service
@@ -172,7 +173,7 @@ jobs:
         name: dependency-scan-${{ matrix.service }}
         path: |
           services/${{ matrix.service }}/*-report.json
-          services/${{ matrix.service }}/npm-audit.json
+          services/${{ matrix.service }}/npm-audit-*.json
         retention-days: 30
   
   # Secret Scanning
