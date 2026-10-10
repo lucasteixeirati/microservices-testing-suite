@@ -1,5 +1,5 @@
 # Multi-stage build for Python User Service
-FROM python:3.13-slim as builder
+FROM python:3.13-slim AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \

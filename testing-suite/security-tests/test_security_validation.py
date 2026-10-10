@@ -69,13 +69,20 @@ class TestAuthenticationSecurity:
     """Test authentication and authorization"""
     
     def test_csrf_token_validation(self):
-        """Test CSRF token validation in payment service"""
-        response = requests.post(f"{BASE_URLS['payment']}/payments", json={
-            'order_id': 'test-order',
-            'amount': 100.0,
-            'method': 'credit_card'
-        })
-        assert response.status_code in [200, 201, 400, 403]
+        """Browser-originated writes without a token are rejected."""
+        cases = [
+            ('user', '/users', {'name': 'CSRF User', 'email': 'csrf@example.com'}),
+            ('order', '/orders', {'user_id': 'abc-123', 'items': [], 'total_amount': 10}),
+            ('payment', '/payments', {'order_id': 'abc-123', 'amount': 10, 'method': 'card'}),
+        ]
+        for service, path, payload in cases:
+            response = requests.post(
+                f"{BASE_URLS[service]}{path}",
+                json=payload,
+                headers={'Origin': 'http://localhost:3000'},
+                timeout=5,
+            )
+            assert response.status_code == 403, (service, response.text)
     
     def test_rate_limiting_simulation(self):
         """Test rate limiting behavior"""

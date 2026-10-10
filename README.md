@@ -1,8 +1,8 @@
 # 🤖 AI-Powered Microservices Testing Suite
 
-[![Tests](https://img.shields.io/badge/Tests-131+%20Scenarios-brightgreen.svg)](https://github.com/)
+[![CI](https://github.com/lucasteixeirati/microservices-testing-suite/actions/workflows/ci.yml/badge.svg)](https://github.com/lucasteixeirati/microservices-testing-suite/actions/workflows/ci.yml)
 [![Chaos](https://img.shields.io/badge/Chaos-13%20Tests-orange.svg)](https://github.com/)
-[![Status](https://img.shields.io/badge/Status-92%25%20Functional-brightgreen.svg)](https://github.com/)
+[![Stacks](https://img.shields.io/badge/tests-Python%20%7C%20Node.js%20%7C%20Go-blue.svg)](TESTING_GUIDE.md)
 [![Python](https://img.shields.io/badge/Python-3.13-yellow.svg)](https://python.org/)
 [![AI](https://img.shields.io/badge/AI-Powered-red.svg)](https://github.com/)
 
@@ -14,7 +14,7 @@
 
 Demonstração **enterprise-grade** que combina:
 - **3 Microserviços** (Python, Node.js, Go) com arquitetura moderna
-- **131+ Testes Automatizados** em 8 categorias diferentes
+- **Testes automatizados** em 8 categorias, com contagem publicada por execução
 - **7 Componentes de IA/ML** para testing inteligente
 - **13 Testes de Chaos Engineering** para validação de resiliência
 - **CI/CD DevSecOps** completo com 3 pipelines
@@ -34,7 +34,7 @@ User Service (Python) ←→ Order Service (Node.js) ←→ Payment Service (Go)
 
 ### **1. Instalação Rápida**
 ```bash
-git clone <repo-url>
+git clone https://github.com/lucasteixeirati/microservices-testing-suite.git
 cd microservices-testing-suite
 
 # Instalar todas as dependências
@@ -67,18 +67,9 @@ python ai-testing/ai_testing_dashboard.py
 
 ## 📊 **Resultados dos Testes**
 
-| Categoria | Cenários | Status | Performance |
-|-----------|----------|--------|-------------|
-| **Unit** | 68 | ✅ 100% | Excelente |
-| **Integration** | 27 | ✅ 85% | Muito Boa |
-| **Contract** | 6 | ✅ 100% | Perfeita |
-| **Chaos** | 13 | ✅ 92% | Muito Boa |
-| **Security** | 8 | ⚠️ 62% | Em Melhoria |
-| **Performance** | 14 | ❌ 21% | Precisa Atenção |
-| **API** | 13 | ✅ 100% | Perfeita |
-| **Load** | 1 suite | ⚠️ 70% | Boa |
+Os números não são mantidos manualmente. Cada execução do CI publica resultados JUnit, relatórios HTML e cobertura. A base inclui testes Python, além de testes nativos em Jest/Supertest e Go/`httptest`.
 
-**Total:** 131+ cenários automatizados
+O dashboard visual mais recente é gerado em `docs/evidence/latest-test-dashboard.html`. Consulte [Evidências visuais](docs/evidence/README.md) para reproduzir os relatórios e adicionar capturas da aplicação.
 
 ---
 
@@ -125,7 +116,7 @@ python ai-testing/ai_testing_dashboard.py
 ## 🎯 **Casos de Uso**
 
 **QA Engineers:** Suite completa + IA para testing inteligente + Chaos engineering
-**DevOps:** CI/CD production-ready + Multi-cloud + Observabilidade
+**DevOps:** CI/CD com quality gates, Kubernetes, service mesh e observabilidade
 **Desenvolvedores:** Arquitetura moderna + 3 linguagens + Service mesh
 
 ---

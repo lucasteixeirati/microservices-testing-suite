@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request, Header, Depends
+from fastapi import FastAPI, HTTPException, Request, Response, Header, Depends
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import List, Optional
 import uuid
@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from cachetools import TTLCache
 from logger import logger
 import asyncio
+import os
 from contextlib import asynccontextmanager
 
 # Optimized connection pool and rate limiting
@@ -66,6 +67,14 @@ class CreateUserRequest(BaseModel):
 users_db = {}
 # Use TTL cache for CSRF tokens to prevent memory leak
 csrf_tokens = TTLCache(maxsize=1000, ttl=3600)  # 1 hour TTL
+allowed_origins = {
+    origin.strip()
+    for origin in os.getenv(
+        "ALLOWED_ORIGINS",
+        "http://localhost:3000,http://localhost:8001,http://127.0.0.1:8001",
+    ).split(",")
+    if origin.strip()
+}
 
 async def verify_csrf_token(request: Request, x_csrf_token: str = Header(None)):
     # Optimized rate limiting per IP
@@ -75,18 +84,36 @@ async def verify_csrf_token(request: Request, x_csrf_token: str = Header(None)):
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
     rate_limiter[client_ip] = current_requests + 1
     
-    # Simplified CSRF handling for better performance
-    if x_csrf_token is None or x_csrf_token not in csrf_tokens:
-        # Generate and add a token for testing
-        token = secrets.token_urlsafe(16)  # Shorter token for performance
-        csrf_tokens[token] = datetime.now()
-        return token
+    origin = request.headers.get("origin")
+    csrf_cookie = request.cookies.get("csrf_token")
+
+    # Non-browser API clients do not carry browser session context and are not
+    # susceptible to CSRF. Browser requests must pass origin + double submit.
+    if origin is None and csrf_cookie is None:
+        return None
+    if origin not in allowed_origins:
+        raise HTTPException(status_code=403, detail="Origin not allowed")
+    if (
+        x_csrf_token is None
+        or csrf_cookie is None
+        or not secrets.compare_digest(x_csrf_token, csrf_cookie)
+        or x_csrf_token not in csrf_tokens
+    ):
+        raise HTTPException(status_code=403, detail="Invalid CSRF token")
     return x_csrf_token
 
 @app.get("/csrf-token")
-async def get_csrf_token():
+async def get_csrf_token(response: Response):
     token = secrets.token_urlsafe(32)
     csrf_tokens[token] = datetime.now()
+    response.set_cookie(
+        key="csrf_token",
+        value=token,
+        httponly=True,
+        secure=os.getenv("COOKIE_SECURE", "false").lower() == "true",
+        samesite="strict",
+        max_age=3600,
+    )
     return {"csrf_token": token}
 
 @app.get("/health")

@@ -35,7 +35,7 @@ graph TB
     subgraph "Testing Infrastructure"
         CT[Contract Tests - 6]
         IT[Integration Tests - 21]
-        UT[Unit Tests - 42]
+        UT[Unit Tests - Python + Node.js + Go]
         PT[Performance Tests - 14]
         ST[Security Tests - 8]
         AT[API Tests - 13]
@@ -208,7 +208,7 @@ graph TB
     TLS_CERTS --> IG
 ```
 
-## 🚀 **Arquitetura de CI/CD (100% Funcional)**
+## 🚀 **Arquitetura de CI/CD**
 
 ```mermaid
 graph TB
@@ -276,7 +276,7 @@ graph TB
 - **Real-time Analytics**: Anomaly detection e clustering
 - **Predictive Analytics**: Failure e performance prediction
 
-### **Testing (131+ Cenários):**
+### **Testing (contagem publicada pelo CI):**
 - **Pytest 8.3.3**: Framework principal de testes
 - **Pactman 2.31.0**: Contract testing (consumer-driven)
 - **Locust 2.17.0**: Load testing e performance
@@ -297,13 +297,13 @@ graph TB
 ### **Infrastructure:**
 - **Kubernetes 1.28+**: Container orchestration
 - **Docker**: Containerization + Security hardened
-- **GitHub Actions**: CI/CD pipeline (100% funcional)
+- **GitHub Actions**: CI/CD com falha bloqueante nas categorias obrigatórias
 - **Helm**: Package management
 
 ## 🎯 **Padrões Arquiteturais Implementados**
 
 ### **Microservices Patterns:**
-- ✅ **Database per Service**
+- 🧪 **Storage ownership per service** (em memória na demonstração; persistência é evolução planejada)
 - ✅ **API Gateway** (Istio Gateway)
 - ✅ **Service Discovery** (Kubernetes DNS)
 - ✅ **Circuit Breaker** (Istio DestinationRule)
@@ -358,10 +358,10 @@ graph TB
 ## 📊 **Métricas de Arquitetura**
 
 ### **Testing Suite:**
-- **Total de Testes**: 131+ cenários implementados
+- **Total de Testes**: calculado automaticamente em cada execução
 - **Cobertura de Serviços**: 3/3 microserviços testados
 - **Tipos de Teste**: 8 categorias
-- **Taxa de Sucesso**: 100% nos testes executados
+- **Taxa de Sucesso**: publicada nos artefatos JUnit e no dashboard de evidências
 
 ### **AI/ML Components:**
 - **Componentes ML**: 7 módulos implementados
@@ -372,21 +372,21 @@ graph TB
 ### **Security:**
 - **Vulnerabilidades Críticas**: 0 (todas corrigidas)
 - **Security Patterns**: 8 implementados
-- **Container Security**: 100% hardened
-- **mTLS Coverage**: 100% dos serviços
+- **Container Security**: execução non-root e capabilities removidas nos serviços
+- **mTLS**: política `STRICT` definida para o namespace no Istio
 
 ### **CI/CD:**
-- **Pipeline Success Rate**: 100%
-- **Deploy Automation**: 100% automatizado
+- **Pipeline**: falhas de testes obrigatórios interrompem a execução
+- **Deploy Automation**: workflow preparado para clusters configurados
 - **Security Scanning**: Semanal com Trivy
 - **Health Checks**: Built-in em todos os containers
 
 ---
 
 **👨💻 Arquiteto:** Lucas Teixeira  
-**🎯 Versão:** 4.0 - AI-Powered Production Ready  
-**📊 Status:** 100% Implementado  
+**🎯 Versão:** 4.1 - AI-Powered Testing Reference
+**📊 Status:** Demonstração evolutiva com quality gates
 **🔒 Security:** All Critical Vulnerabilities Fixed  
 **🤖 AI/ML:** 7 Components Fully Functional  
-**🚀 CI/CD:** 100% Functional with Automated Deploy  
+**🚀 CI/CD:** Testes bloqueantes e relatórios reproduzíveis
 **📦 Containers:** Security Hardened with Health Checks

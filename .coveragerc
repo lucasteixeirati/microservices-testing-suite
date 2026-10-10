@@ -1,0 +1,20 @@
+[run]
+source = services/user-service
+omit =
+    */tests/*
+    */test_*
+    */venv/*
+    */.venv/*
+    */__pycache__/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:
+    raise NotImplementedError
+
+[html]
+directory = testing-suite/reports/coverage
+
+[json]
+output = testing-suite/reports/coverage.json

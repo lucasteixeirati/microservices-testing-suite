@@ -1,8 +1,6 @@
 const express = require('express');
-const axios = require('axios');
-const csrf = require('csurf');
 const cookieParser = require('cookie-parser');
-const { v4: uuidv4 } = require('uuid');
+const { randomBytes, randomUUID, timingSafeEqual } = require('crypto');
 const { URL } = require('url');
 const rateLimit = require('express-rate-limit');
 
@@ -30,33 +28,38 @@ const generalLimiter = rateLimit({
 });
 
 // Enhanced CSRF Protection for testing and production
-const csrfProtection = csrf({ 
-    cookie: true,
-    ignoreMethods: ['GET', 'HEAD', 'OPTIONS'],
-    value: (req) => {
-        const token = req.headers['x-csrf-token'] || req.body._csrf || req.query._csrf;
-        // For development: accept test tokens, for production: validate properly
-        return token && token.length >= 8 ? token : 'dev-test-token-' + Date.now();
+const csrfTokens = new Map();
+const allowedOrigins = new Set(
+    (process.env.ALLOWED_ORIGINS || 'http://localhost:3000,http://localhost:8002,http://127.0.0.1:8002')
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean)
+);
+
+// CSRF is a browser-session threat. Service-to-service requests without Origin
+// or cookies do not need a CSRF token.
+function browserCsrfProtection(req, res, next) {
+    if (!req.headers.origin && !req.headers.cookie) {
+        return next();
     }
-});
+    const headerToken = req.headers['x-csrf-token'];
+    const cookieToken = req.cookies.csrf_token;
+    const expiresAt = csrfTokens.get(headerToken);
+    const sameToken = typeof headerToken === 'string'
+        && typeof cookieToken === 'string'
+        && headerToken.length === cookieToken.length
+        && timingSafeEqual(Buffer.from(headerToken), Buffer.from(cookieToken));
+
+    if (!allowedOrigins.has(req.headers.origin) || !sameToken || !expiresAt || expiresAt < Date.now()) {
+        return res.status(403).json({ error: 'Invalid CSRF token' });
+    }
+    csrfTokens.delete(headerToken);
+    return next();
+}
 
 // Allowed hosts for SSRF prevention
-const allowedHosts = ['localhost:8001', 'user-service:8001'];
-
-// Configure axios with production-ready settings
-axios.defaults.timeout = 2000;
-axios.defaults.maxRedirects = 0;
-
-// Production-grade connection pooling
-const http = require('http');
-const agent = new http.Agent({
-    keepAlive: true,
-    maxSockets: 100,
-    maxFreeSockets: 20,
-    timeout: 2000,
-    keepAliveMsecs: 1000
-});
-axios.defaults.httpAgent = agent;
+const userServiceUrl = new URL(process.env.USER_SERVICE_URL || 'http://localhost:8001');
+const allowedHosts = [userServiceUrl.host];
 
 // In-memory storage with optimized access
 const orders = {};
@@ -83,12 +86,20 @@ app.get('/health', (req, res) => {
 });
 
 // CSRF token endpoint
-app.get('/csrf-token', csrfProtection, (req, res) => {
-    res.json({ csrfToken: req.csrfToken() });
+app.get('/csrf-token', (req, res) => {
+    const token = randomBytes(32).toString('base64url');
+    csrfTokens.set(token, Date.now() + 60 * 60 * 1000);
+    res.cookie('csrf_token', token, {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: process.env.COOKIE_SECURE === 'true',
+        maxAge: 60 * 60 * 1000
+    });
+    res.json({ csrfToken: token });
 });
 
 // Create order with proper rate limiting and caching
-app.post('/orders', createOrderLimiter, async (req, res) => {
+app.post('/orders', createOrderLimiter, browserCsrfProtection, async (req, res) => {
     try {
         const { user_id, items, total_amount } = req.body;
         
@@ -103,26 +114,23 @@ app.post('/orders', createOrderLimiter, async (req, res) => {
         
         if (userExists === undefined) {
             // Validate user exists with SSRF protection
-            const userURL = `http://localhost:8001/users/${encodeURIComponent(user_id)}`;
+            const userURL = new URL(`/users/${encodeURIComponent(user_id)}`, userServiceUrl).toString();
             if (!isAllowedURL(userURL)) {
                 return res.status(400).json({ error: 'Invalid request' });
             }
             
             try {
-                const userResponse = await axios.get(userURL, {
-                    timeout: 1500,
-                    validateStatus: (status) => status < 500,
-                    maxRedirects: 0 // Prevent redirect attacks
+                const userResponse = await fetch(userURL, {
+                    signal: AbortSignal.timeout(1500),
+                    redirect: 'manual'
                 });
                 userExists = userResponse.status === 200;
                 // Cache user validation for 30 seconds
                 ordersCache.set(cacheKey, userExists);
-                setTimeout(() => ordersCache.delete(cacheKey), 30000);
+                const evictionTimer = setTimeout(() => ordersCache.delete(cacheKey), 30000);
+                evictionTimer.unref();
             } catch (error) {
                 console.error(`User validation error for ${user_id}:`, error.message);
-                if (error.response?.status === 404) {
-                    return res.status(400).json({ error: 'User not found' });
-                }
                 // On network error, don't cache and return error
                 return res.status(503).json({ error: 'User service unavailable' });
             }
@@ -133,7 +141,7 @@ app.post('/orders', createOrderLimiter, async (req, res) => {
         }
         
         const order = {
-            id: uuidv4(),
+            id: randomUUID(),
             user_id,
             items,
             total_amount,
@@ -164,7 +172,7 @@ app.get('/orders', (req, res) => {
 });
 
 // Update order status with rate limiting and CSRF protection
-app.patch('/orders/:order_id/status', generalLimiter, csrfProtection, (req, res) => {
+app.patch('/orders/:order_id/status', generalLimiter, browserCsrfProtection, (req, res) => {
     // CSRF token is now validated by middleware
     
     const order = getCachedOrder(req.params.order_id);
@@ -205,6 +213,10 @@ function isAllowedURL(targetURL) {
 }
 
 const PORT = process.env.PORT || 8002;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Order Service running on port ${PORT}`);
-});
+if (require.main === module) {
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Order Service running on port ${PORT}`);
+    });
+}
+
+module.exports = { app, isAllowedURL, isValidUserId };

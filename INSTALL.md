@@ -380,5 +380,5 @@ AI Simple ML Demo - Testing Intelligence
 
 **👨💻 DevOps Engineer:** Lucas Teixeira  
 **🎯 Projeto:** AI-Powered Microservices Testing Suite  
-**📊 Status:** Instalação 100% Funcional  
+**📊 Status:** Guia de instalação para ambiente local e Docker
 **🤖 ML Components:** 7 Componentes Implementados

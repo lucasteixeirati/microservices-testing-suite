@@ -82,3 +82,37 @@ class TestUserServiceUnit:
         """Test deleting non-existent user"""
         response = client.delete("/users/non-existent-id")
         assert response.status_code == 404
+
+    def test_browser_write_rejects_missing_csrf_token(self):
+        """Browser-originated writes must include the double-submit token."""
+        response = client.post(
+            "/users",
+            headers={"Origin": "http://localhost:3000"},
+            json={"name": "Browser User", "email": "browser-missing@example.com"},
+        )
+        assert response.status_code == 403
+        assert response.json()["detail"] == "Invalid CSRF token"
+
+    def test_browser_write_accepts_valid_csrf_token(self):
+        """A token issued by the service and its cookie authorize the write."""
+        token_response = client.get("/csrf-token")
+        token = token_response.json()["csrf_token"]
+        response = client.post(
+            "/users",
+            headers={
+                "Origin": "http://localhost:3000",
+                "X-CSRF-Token": token,
+            },
+            json={"name": "Browser User", "email": "browser-valid@example.com"},
+        )
+        assert response.status_code == 200
+
+    def test_browser_write_rejects_untrusted_origin(self):
+        token = client.get("/csrf-token").json()["csrf_token"]
+        response = client.post(
+            "/users",
+            headers={"Origin": "https://evil.example", "X-CSRF-Token": token},
+            json={"name": "Blocked User", "email": "blocked@example.com"},
+        )
+        assert response.status_code == 403
+        assert response.json()["detail"] == "Origin not allowed"
