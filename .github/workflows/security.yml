@@ -42,7 +42,7 @@ jobs:
     
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
     
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
@@ -74,7 +74,7 @@ jobs:
     
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
     
     - name: Run Trivy Filesystem Scan
       uses: aquasecurity/trivy-action@master
@@ -94,7 +94,7 @@ jobs:
         output: 'trivy-config-results.sarif'
     
     - name: Upload Trivy Results as Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: trivy-scan-results
@@ -116,23 +116,23 @@ jobs:
     
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
     
     - name: Setup Python (for user-service)
       if: matrix.service == 'user-service'
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       with:
         python-version: '3.13'
     
     - name: Setup Node.js (for order-service)
       if: matrix.service == 'order-service'
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v7
       with:
-        node-version: '18'
+        node-version: '24'
     
     - name: Setup Go (for payment-service)
       if: matrix.service == 'payment-service'
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v7
       with:
         go-version: '1.21'
     
@@ -167,7 +167,7 @@ jobs:
         fi
     
     - name: Upload Dependency Scan Results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: dependency-scan-${{ matrix.service }}
@@ -185,7 +185,7 @@ jobs:
     
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         fetch-depth: 0  # Full history for better secret detection
     
@@ -220,7 +220,7 @@ jobs:
         fi
     
     - name: Upload Secret Scan Results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: secret-scan-results
@@ -236,15 +236,15 @@ jobs:
     
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
     
     - name: Setup Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       with:
         python-version: '3.12'
     
     - name: Download All Artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         path: security-artifacts
     
@@ -309,7 +309,7 @@ jobs:
         echo "✅ Security report generated"
     
     - name: Upload Security Report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: security-dashboard-${{ github.run_number }}
