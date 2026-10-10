@@ -15,6 +15,7 @@ from advanced_ml_engine import AdvancedMLEngine, TestMetrics
 from datetime import datetime, timedelta
 import numpy as np
 import json
+from typing import Any, Dict, List
 
 class MLTestingSuite:
     """Suite integrada de ML para testing automation"""

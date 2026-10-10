@@ -42,7 +42,11 @@ describe('Order Service', () => {
   test('validates identifiers and upstream URLs', () => {
     expect(isValidUserId('550e8400-e29b-41d4-a716-446655440000')).toBe(true);
     expect(isValidUserId('../etc/passwd')).toBe(false);
-    expect(isAllowedURL('http://localhost:8001/users/123')).toBe(true);
+    const configuredUserURL = new URL(
+      '/users/123',
+      process.env.USER_SERVICE_URL || 'http://localhost:8001'
+    ).toString();
+    expect(isAllowedURL(configuredUserURL)).toBe(true);
     expect(isAllowedURL('http://evil.example/users/123')).toBe(false);
     expect(isAllowedURL('https://localhost:8001/users/123')).toBe(false);
     expect(isAllowedURL('not a url')).toBe(false);

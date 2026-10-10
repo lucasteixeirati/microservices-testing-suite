@@ -1,5 +1,5 @@
 # Multi-stage build for Node.js Order Service
-FROM node:18-alpine AS builder
+FROM node:24-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -11,7 +11,7 @@ COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
 # Production stage
-FROM node:18-alpine
+FROM node:24-alpine
 
 # Install curl for health checks
 RUN apk add --no-cache curl

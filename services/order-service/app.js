@@ -130,7 +130,11 @@ app.post('/orders', createOrderLimiter, browserCsrfProtection, async (req, res) 
                 const evictionTimer = setTimeout(() => ordersCache.delete(cacheKey), 30000);
                 evictionTimer.unref();
             } catch (error) {
-                console.error(`User validation error for ${user_id}:`, error.message);
+                const cause = error.cause?.message || error.cause?.code;
+                console.error(
+                    `User validation error for ${user_id}:`,
+                    cause ? `${error.message} (${cause})` : error.message
+                );
                 // On network error, don't cache and return error
                 return res.status(503).json({ error: 'User service unavailable' });
             }

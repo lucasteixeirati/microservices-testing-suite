@@ -10,6 +10,10 @@ on:
 env:
   PYTHONPATH: ${{ github.workspace }}
   PYTHONUNBUFFERED: 1
+  # Force the local inter-service hop over IPv4 and keep load suites isolated
+  # from the production rate-limit default (200 writes/minute).
+  USER_SERVICE_URL: http://127.0.0.1:8001
+  USER_RATE_LIMIT_MAX: 5000
 
 jobs:
   test:
@@ -17,23 +21,23 @@ jobs:
     timeout-minutes: 45
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     
     - name: Setup Python 3.13
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       with:
         python-version: '3.13'
         cache: 'pip'
     
-    - name: Setup Node.js 18
-      uses: actions/setup-node@v4
+    - name: Setup Node.js 24
+      uses: actions/setup-node@v7
       with:
-        node-version: '18'
+        node-version: '24'
         cache: 'npm'
         cache-dependency-path: 'services/order-service/package-lock.json'
     
     - name: Setup Go 1.21
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v7
       with:
         go-version: '1.21'
         cache: true
@@ -289,7 +293,18 @@ jobs:
         echo "[SUCCESS] Chaos tests completed"
     
     - name: Show Service Logs on Failure
-      if: failure()
+      if: >-
+        always() &&
+        (steps.python-unit.outcome != 'success' ||
+        steps.node-unit.outcome != 'success' ||
+        steps.go-unit.outcome != 'success' ||
+        steps.contract.outcome != 'success' ||
+        steps.integration.outcome != 'success' ||
+        steps.security-tests.outcome != 'success' ||
+        steps.api-tests.outcome != 'success' ||
+        steps.performance.outcome != 'success' ||
+        steps.ai-ml.outcome != 'success' ||
+        steps.chaos.outcome != 'success')
       run: |
         echo "[DEBUG] Collecting service logs for debugging..."
         echo "=== User Service Log ==="
@@ -362,7 +377,7 @@ jobs:
         echo "[SUCCESS] Test reports generated"
     
     - name: Upload Test Reports and Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: test-reports-${{ github.run_number }}

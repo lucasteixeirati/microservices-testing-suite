@@ -14,7 +14,7 @@ O projeto foi otimizado para usar dependências que **não exigem** as Ferrament
 ### **Verificar Instalação:**
 ```bash
 python --version  # Deve mostrar 3.13+
-node --version    # Deve mostrar 18+
+node --version    # Deve mostrar 24+
 go version        # Deve mostrar 1.21+
 ```
 

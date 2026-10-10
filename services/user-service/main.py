@@ -14,6 +14,7 @@ from contextlib import asynccontextmanager
 # Optimized connection pool and rate limiting
 connection_pool = asyncio.Semaphore(500)  # Much higher concurrent connections
 rate_limiter = TTLCache(maxsize=10000, ttl=60)  # Rate limit per IP per minute
+rate_limit_max = int(os.getenv("USER_RATE_LIMIT_MAX", "200"))
 email_cache = TTLCache(maxsize=5000, ttl=300)  # Cache for email lookups
 
 @asynccontextmanager
@@ -80,7 +81,7 @@ async def verify_csrf_token(request: Request, x_csrf_token: str = Header(None)):
     # Optimized rate limiting per IP
     client_ip = request.client.host
     current_requests = rate_limiter.get(client_ip, 0)
-    if current_requests > 200:  # Increased limit for load testing
+    if current_requests >= rate_limit_max:
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
     rate_limiter[client_ip] = current_requests + 1
     
